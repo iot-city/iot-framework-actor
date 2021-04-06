@@ -29,7 +29,11 @@ public class AppTest extends TestCase {
 	 */
 	public void testApp() {
 		ActorManager manager = new ActorManager();
-		new ActorConfigure().config(manager, "org/iotcity/iot/framework/actor/iot-actor.properties", true);
+		try {
+			new ActorConfigure().config(manager, "org/iotcity/iot/framework/actor/iot-actor.properties", true);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		assertTrue(true);
 	}
 }

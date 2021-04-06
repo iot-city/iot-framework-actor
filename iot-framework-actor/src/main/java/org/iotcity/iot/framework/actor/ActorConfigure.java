@@ -20,8 +20,9 @@ public class ActorConfigure {
 	 * @param manager The actor manager to execute the configuration results
 	 * @param configFile The application configure properties file (e.g. "org/iotcity/iot/framework/actor/iot-actor.properties")
 	 * @param fromPackage Whether load the file from package
+	 * @throws Exception Throw an exception when an error is encountered
 	 */
-	public void config(ActorManager manager, String configFile, boolean fromPackage) {
+	public void config(ActorManager manager, String configFile, boolean fromPackage) throws Exception {
 
 		// Load file properties
 		Properties props = PropertiesLoader.loadProperties(configFile, "UTF-8", fromPackage);
