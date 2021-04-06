@@ -27,8 +27,8 @@ public class ApplicationConfig {
 	 */
 	public String[] ignorePackages;
 	/**
-	 * Description of this application
+	 * Document description of this application
 	 */
-	public String desc;
+	public String doc;
 
 }

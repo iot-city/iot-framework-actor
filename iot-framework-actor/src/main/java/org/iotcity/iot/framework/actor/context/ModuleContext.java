@@ -14,11 +14,11 @@ public class ModuleContext {
 	// --------------------------- Public fields ----------------------------
 
 	/**
-	 * (Readonly) Application ID (not null or empty)
+	 * (Readonly) The application to which this module belongs (not null)
 	 */
-	public final String appID;
+	public final ApplicationContext app;
 	/**
-	 * (Readonly) Module ID in application (not null, the empty value indicates that the module belongs to the global module)
+	 * (Readonly) Module ID in application (not null or empty)
 	 */
 	public final String moduleID;
 	/**
@@ -27,9 +27,9 @@ public class ModuleContext {
 	 */
 	public boolean enabled;
 	/**
-	 * Description of this module
+	 * Document description of this module
 	 */
-	public String desc;
+	public String doc;
 
 	// --------------------------- Private fields ----------------------------
 
@@ -43,30 +43,22 @@ public class ModuleContext {
 
 	/**
 	 * Constructor for module context
-	 * @param appID Application ID (not null or empty)
-	 * @param moduleID Module ID in application (optional, null or empty value indicates that the module belongs to the global module)
+	 * @param app The application to which the module belongs (not null)
+	 * @param moduleID Module ID in application (not null or empty)
 	 * @param enabled Whether to enable this module
-	 * @param desc Description of this module
+	 * @param doc Document description of this module
 	 */
-	public ModuleContext(String appID, String moduleID, boolean enabled, String desc) {
-		if (StringHelper.isEmpty(appID)) {
-			throw new IllegalArgumentException("Parameter appID can not be null or empty!");
+	ModuleContext(ApplicationContext app, String moduleID, boolean enabled, String doc) {
+		if (app == null || StringHelper.isEmpty(moduleID)) {
+			throw new IllegalArgumentException("Parameter app and moduleID can not be null or empty!");
 		}
-		this.appID = appID;
-		this.moduleID = (moduleID == null ? "" : moduleID);
+		this.app = app;
+		this.moduleID = moduleID;
 		this.enabled = enabled;
-		this.desc = desc;
+		this.doc = doc;
 	}
 
 	// --------------------------- Public methods ----------------------------
-
-	/**
-	 * Gets whether it is a global module
-	 * @return boolean Whether it is a global module
-	 */
-	public boolean isGlobalModule() {
-		return StringHelper.isEmpty(this.moduleID);
-	}
 
 	/**
 	 * Gets all actors in this module
@@ -77,39 +69,31 @@ public class ModuleContext {
 	}
 
 	/**
-	 * Add an actor to this module, if the actor ID has been added in current module, it will be replaced by current actor object.
-	 * @param actor Actor context object (not null)
+	 * Add an actor to this module, if the actor ID has been created in this module, it will return the existing actor object directly.
+	 * @param permission The permission handler of this actor (not null)
+	 * @param actorID Actor ID in module (not null or empty, equivalent to page ID)
+	 * @param actorClass The actor class (not null)
+	 * @param enabled Whether to enable this actor
+	 * @param doc Document description of this actor
+	 * @return ActorContext The actor context that be created in this module (returns null if the actorID is invalid)
 	 */
-	public synchronized void addActor(ActorContext actor) {
-		if (actor == null) return;
+	public synchronized ActorContext addActor(PermissionHandler permission, String actorID, Class<?> actorClass, boolean enabled, String doc) {
+		if (StringHelper.isEmpty(actorID)) return null;
+		ActorContext actor = this.actors.get(actorID.toUpperCase());
+		if (actor != null) return actor;
+		actor = new ActorContext(this, permission, actorID, actorClass, enabled, doc);
 		this.actors.put(actor.actorID.toUpperCase(), actor);
+		return actor;
 	}
 
 	/**
-	 * Gets an actor object of the specified actor ID (if actor ID does not exists in current module, will returns null)
+	 * Gets an actor object for the specified actor ID (if actor ID does not exists in current module, will returns null)
 	 * @param actorID The actor ID in this module
 	 * @return ActorContext Actor context object or null
 	 */
 	public ActorContext getActor(String actorID) {
 		if (StringHelper.isEmpty(actorID)) return null;
 		return this.actors.get(actorID.toUpperCase());
-	}
-
-	/**
-	 * Get or create an actor object of the specified parameters (returns not null)
-	 * @param actorID Actor ID in module (not null or empty, equivalent to page ID)
-	 * @param actorClass The actor class (not null)
-	 * @param enabled Whether to enable this actor
-	 * @param desc Description of this actor
-	 * @return ActorContext Actor context object (not null)
-	 */
-	public synchronized ActorContext getOrCreateActor(String actorID, Class<?> actorClass, boolean enabled, String desc) {
-		ActorContext actor = this.getActor(actorID);
-		if (actor == null) {
-			actor = new ActorContext(this.appID, this.moduleID, actorID, actorClass, enabled, desc);
-			this.actors.put(actor.actorID.toUpperCase(), actor);
-		}
-		return actor;
 	}
 
 	/**
@@ -130,6 +114,13 @@ public class ModuleContext {
 	public synchronized ActorContext removeActor(String actorID) {
 		if (StringHelper.isEmpty(actorID)) return null;
 		return this.actors.remove(actorID.toUpperCase());
+	}
+
+	/**
+	 * Clear all actors in current module
+	 */
+	public synchronized void clearActors() {
+		this.actors.clear();
 	}
 
 }

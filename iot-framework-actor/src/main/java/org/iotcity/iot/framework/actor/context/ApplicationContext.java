@@ -15,6 +15,10 @@ public class ApplicationContext {
 	// --------------------------- Public fields ----------------------------
 
 	/**
+	 * (Readonly) The actor manager to which the application belongs (not null)
+	 */
+	public final ActorManager manager;
+	/**
 	 * (Readonly) Application ID (not null or empty)
 	 */
 	public final String appID;
@@ -28,15 +32,14 @@ public class ApplicationContext {
 	 */
 	public boolean enabled;
 	/**
-	 * Description of this application
+	 * Document description of this application
 	 */
-	public String desc;
+	public String doc;
 
 	// --------------------------- Private fields ----------------------------
 
 	/**
-	 * All modules in this application, the key is module ID (upper case), the value is module context object.<br/>
-	 * <b>If the module ID is set to null or empty, the module belongs to the global module</b>
+	 * All modules in this application, the key is module ID (upper case), the value is module context object.
 	 */
 	private final Map<String, ModuleContext> modules = new HashMap<>();
 
@@ -44,19 +47,21 @@ public class ApplicationContext {
 
 	/**
 	 * Constructor for application context
+	 * @param manager The actor manager to which the application belongs (not null)
 	 * @param appID Application ID (not null or empty)
 	 * @param version Application version (optional, when it is null, the default value is "1.0.0")
 	 * @param enabled Whether to enable this application
-	 * @param desc Description of this application
+	 * @param doc Document description of this application
 	 */
-	public ApplicationContext(String appID, String version, boolean enabled, String desc) {
-		if (StringHelper.isEmpty(appID)) {
-			throw new IllegalArgumentException("Parameter appID can not be null or empty!");
+	public ApplicationContext(ActorManager manager, String appID, String version, boolean enabled, String doc) {
+		if (manager == null || StringHelper.isEmpty(appID)) {
+			throw new IllegalArgumentException("Parameter manager, appID can not be null or empty!");
 		}
+		this.manager = manager;
 		this.appID = appID;
 		this.version = ActorManager.fixAppVersion(version);
 		this.enabled = enabled;
-		this.desc = desc;
+		this.doc = doc;
 	}
 
 	// --------------------------- Public methods ----------------------------
@@ -70,60 +75,56 @@ public class ApplicationContext {
 	}
 
 	/**
-	 * Add a module to this application, if the module ID has been added in this application, it will be replaced by current module object.<br/>
-	 * <b>If the module ID is set to null or empty, the module belongs to the global module</b>
-	 * @param module Module context object (not null)
-	 */
-	public synchronized void addModule(ModuleContext module) {
-		if (module == null) return;
-		this.modules.put(module.moduleID.toUpperCase(), module);
-	}
-
-	/**
-	 * Gets a module object of the specified module ID (if module ID does not exists in this application, will returns null)
-	 * @param moduleID The module ID (<b>If the module ID is set to null or empty, the module belongs to the global module</b>)
-	 * @return ModuleContext Module context object or null
-	 */
-	public ModuleContext getModule(String moduleID) {
-		if (moduleID == null) moduleID = "";
-		return this.modules.get(moduleID.toUpperCase());
-	}
-
-	/**
-	 * Get or create a module object of the specified parameters (returns not null)
-	 * @param moduleID The module ID (<b>If the module ID is set to null or empty, the module belongs to the global module</b>)
+	 * Add a module to this application, if the module ID has been created in this application, it will return the existing module object directly.
+	 * @param moduleID Module ID in application (not null or empty)
 	 * @param enabled Whether to enable this module
-	 * @param desc Description of this module
-	 * @return ModuleContext Module context object (not null)
+	 * @param doc Document description of this module
+	 * @return ModuleContext The module context that be created in this application (returns null if the moduleID is invalid)
 	 */
-	public synchronized ModuleContext getOrCreateModule(String moduleID, boolean enabled, String desc) {
-		if (moduleID == null) moduleID = "";
+	public synchronized ModuleContext addModule(String moduleID, boolean enabled, String doc) {
+		if (StringHelper.isEmpty(moduleID)) return null;
 		ModuleContext module = this.modules.get(moduleID.toUpperCase());
-		if (module == null) {
-			module = new ModuleContext(this.appID, moduleID, enabled, desc);
-			this.modules.put(moduleID.toUpperCase(), module);
-		}
+		if (module != null) return module;
+		module = new ModuleContext(this, moduleID, enabled, doc);
+		this.modules.put(module.moduleID.toUpperCase(), module);
 		return module;
 	}
 
 	/**
+	 * Gets a module object for the specified module ID (if module ID does not exists in this application, will returns null)
+	 * @param moduleID The module ID in application (not null or empty)
+	 * @return ModuleContext Module context object or null
+	 */
+	public ModuleContext getModule(String moduleID) {
+		if (StringHelper.isEmpty(moduleID)) return null;
+		return this.modules.get(moduleID.toUpperCase());
+	}
+
+	/**
 	 * Determine whether the specified module exists
-	 * @param moduleID The module ID (<b>If the module ID is set to null or empty, the module belongs to the global module</b>)
-	 * @return boolean If mid already exists, it returns true; otherwise, it returns false
+	 * @param moduleID The module ID in application (not null or empty)
+	 * @return boolean If module already exists, it returns true; otherwise, it returns false
 	 */
 	public boolean hasModule(String moduleID) {
-		if (moduleID == null) moduleID = "";
+		if (StringHelper.isEmpty(moduleID)) return false;
 		return this.modules.containsKey(moduleID.toUpperCase());
 	}
 
 	/**
 	 * Remove a module object by the specified module ID
-	 * @param moduleID The module ID (<b>If the module ID is set to null or empty, the module belongs to the global module</b>)
+	 * @param moduleID The module ID in application (not null or empty)
 	 * @return ModuleContext The module context object that be removed, will returns null if mismatch.
 	 */
 	public synchronized ModuleContext removeModule(String moduleID) {
-		if (moduleID == null) moduleID = "";
+		if (StringHelper.isEmpty(moduleID)) return null;
 		return this.modules.remove(moduleID.toUpperCase());
+	}
+
+	/**
+	 * Clear all modules in current application
+	 */
+	public synchronized void clearModules() {
+		this.modules.clear();
 	}
 
 }

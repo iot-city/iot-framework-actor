@@ -4,8 +4,8 @@ import java.lang.reflect.Method;
 
 import org.iotcity.iot.framework.actor.context.ActorContext;
 import org.iotcity.iot.framework.actor.context.ApplicationContext;
-import org.iotcity.iot.framework.actor.context.CommandContext;
 import org.iotcity.iot.framework.actor.context.ModuleContext;
+import org.iotcity.iot.framework.actor.context.PermissionHandler;
 import org.iotcity.iot.framework.core.annotation.AnnotationParser;
 import org.iotcity.iot.framework.core.util.helper.StringHelper;
 
@@ -32,29 +32,46 @@ public class ActorAnnotationParser implements AnnotationParser {
 	@Override
 	public void parse(Class<?> clazz) {
 		if (!clazz.isAnnotationPresent(Actor.class)) return;
+
 		// Get actor annotation
 		Actor actor = clazz.getAnnotation(Actor.class);
-		String actorID = StringHelper.trim(actor.id());
+		String actorID = StringHelper.trim(actor.actorID());
 		String moduleID = StringHelper.trim(actor.moduleID());
-		// Create actor context
-		ActorContext actorContext = new ActorContext(this.app.appID, moduleID, actorID, clazz, actor.enabled(), actor.desc());
+
+		// Create or get a module context
+		ModuleContext module = this.app.addModule(moduleID, true, "");
+
+		// Create or get an actor context
+		int[] licenses = null;
+		if (clazz.isAnnotationPresent(Permission.class)) {
+			Permission permission = clazz.getAnnotation(Permission.class);
+			if (permission != null) licenses = permission.value();
+		}
+		PermissionHandler phandler = new PermissionHandler(licenses);
+		ActorContext actorContext = module.addActor(phandler, actorID, clazz, actor.enabled(), actor.doc());
+
 		// Analyze methods
 		Method[] methods = clazz.getMethods();
+		// Traversing methods
 		for (Method method : methods) {
 			if (!method.isAnnotationPresent(Command.class)) continue;
+
 			// Get command annotation
 			Command command = method.getAnnotation(Command.class);
 			String cmd = StringHelper.trim(command.cmd());
 			if (cmd.length() == 0) continue;
+
+			// Get permission annotation of command
+			licenses = null;
+			if (method.isAnnotationPresent(Permission.class)) {
+				Permission permission = method.getAnnotation(Permission.class);
+				if (permission != null) licenses = permission.value();
+			}
+			phandler = new PermissionHandler(licenses);
+
 			// Create command context
-			CommandContext cmdContext = new CommandContext(cmd, clazz, method, command.enabled(), command.desc());
-			// Add to actor context
-			actorContext.addCommand(cmdContext);
+			actorContext.addCommand(phandler, cmd, method, command.enabled(), command.doc());
 		}
-		// Get the module context
-		ModuleContext module = this.app.getOrCreateModule(moduleID, true, "");
-		// Add actor context to the module
-		module.addActor(actorContext);
 	}
 
 }

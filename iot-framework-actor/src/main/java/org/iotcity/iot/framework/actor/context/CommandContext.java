@@ -13,13 +13,17 @@ public class CommandContext {
 	// --------------------------- Public fields ----------------------------
 
 	/**
+	 * (Readonly) The actor to which this command belongs (not null)
+	 */
+	public final ActorContext actor;
+	/**
+	 * (Readonly) The permission handler of this command (not null)
+	 */
+	public final PermissionHandler permission;
+	/**
 	 * (Readonly) Command ID (not null or empty)
 	 */
 	public final String cmd;
-	/**
-	 * (Readonly) The actor class of this command (not null)
-	 */
-	public final Class<?> actorClass;
 	/**
 	 * (Readonly) The method of this command is already bound (not null)
 	 */
@@ -30,29 +34,31 @@ public class CommandContext {
 	 */
 	public boolean enabled;
 	/**
-	 * Description of this command
+	 * Document description of this command
 	 */
-	public String desc;
+	public String doc;
 
 	// --------------------------- Constructor ----------------------------
 
 	/**
 	 * Constructor for command context
+	 * @param actor The actor to which this command belongs (not null)
+	 * @param permission The permission handler of this command (not null)
 	 * @param cmd Command ID (not null or empty)
-	 * @param actorClass The actor class of this command (not null)
 	 * @param method The method of this command is already bound (not null)
 	 * @param enabled Whether to enable this command
-	 * @param desc Description of this command
+	 * @param doc Document description of this command
 	 */
-	public CommandContext(String cmd, Class<?> actorClass, Method method, boolean enabled, String desc) {
-		if (StringHelper.isEmpty(cmd) || actorClass == null || method == null) {
-			throw new IllegalArgumentException("Parameter cmd, actorClass and method can not be null or empty!");
+	CommandContext(ActorContext actor, PermissionHandler permission, String cmd, Method method, boolean enabled, String doc) {
+		if (actor == null || permission == null || StringHelper.isEmpty(cmd) || method == null) {
+			throw new IllegalArgumentException("Parameter actor, permission, cmd and method can not be null or empty!");
 		}
+		this.actor = actor;
+		this.permission = permission;
 		this.cmd = cmd;
-		this.actorClass = actorClass;
 		this.method = method;
 		this.enabled = enabled;
-		this.desc = desc;
+		this.doc = doc;
 	}
 
 }

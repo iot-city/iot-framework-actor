@@ -8,7 +8,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Command annotation
+ * Command annotation<br/>
+ * For example, set up a command for the method:<br/>
+ * 
+ * <pre>
+ *    &#064;Command(cmd = "update-online-status", doc = "Update user online status")
+ *    public boolean updateOnlieStatus(String useID, int status) {
+ *        ...
+ *    }
+ * </pre>
+ * 
  * @author Ardon
  */
 @Documented
@@ -17,14 +26,14 @@ import java.lang.annotation.Target;
 public @interface Command {
 
 	/**
-	 * The command ID of current method (required, not null or empty)
+	 * The command ID to access this method (required, not null or empty)
 	 */
 	String cmd();
 
 	/**
-	 * Description of this command (required, cannot be null or empty)
+	 * Document description of this command (required, cannot be null or empty)
 	 */
-	String desc();
+	String doc();
 
 	/**
 	 * Whether to enable this command (optional, true by default)

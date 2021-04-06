@@ -64,7 +64,24 @@ public class ActorManager {
 	}
 
 	/**
-	 * Gets an application object of the specified application ID (if appID does not exists in this actor manager, will returns null)
+	 * Add an application to this manager, if the application ID has been created in this manager, it will return the existing application object directly.
+	 * @param appID Application ID (not null or empty)
+	 * @param version Application version (optional, when it is null, the default value is "1.0.0")
+	 * @param enabled Whether to enable this application
+	 * @param doc Document description of this application
+	 * @return ApplicationContext The application context that be created in this application (returns null if the appID is invalid)
+	 */
+	public synchronized ApplicationContext addApplication(String appID, String version, boolean enabled, String doc) {
+		if (StringHelper.isEmpty(appID)) return null;
+		ApplicationContext app = this.apps.get(getAppKey(appID, version));
+		if (app != null) return app;
+		app = new ApplicationContext(this, appID, version, enabled, doc);
+		this.apps.put(getAppKey(app.appID, app.version), app);
+		return app;
+	}
+
+	/**
+	 * Gets an application object for the specified application ID (if appID does not exists in this actor manager, will returns null)
 	 * @param appID The application ID (not null or empty)
 	 * @param version The application version (optional, when it is null, the default value is "1.0.0")
 	 * @return ApplicationContext Application context object or null
@@ -72,23 +89,6 @@ public class ActorManager {
 	public ApplicationContext getApplication(String appID, String version) {
 		if (StringHelper.isEmpty(appID)) return null;
 		return this.apps.get(getAppKey(appID, version));
-	}
-
-	/**
-	 * Get or create an application object of the specified parameters (returns not null)
-	 * @param appID Application ID (not null or empty)
-	 * @param version Application version (optional, when it is null, the default value is "1.0.0")
-	 * @param enabled Whether to enable this application
-	 * @param desc Description of this application
-	 * @return ApplicationContext Application context object (not null)
-	 */
-	public synchronized ApplicationContext getOrCreateApplication(String appID, String version, boolean enabled, String desc) {
-		ApplicationContext app = this.getApplication(appID, version);
-		if (app == null) {
-			app = new ApplicationContext(appID, version, enabled, desc);
-			this.apps.put(getAppKey(app.appID, app.version), app);
-		}
-		return app;
 	}
 
 	/**
@@ -114,10 +114,17 @@ public class ActorManager {
 	}
 
 	/**
-	 * Gets a command object of the specified parameters (if command does not exists, will returns null)
+	 * Clear all applications in current manager
+	 */
+	public synchronized void clearApplications() {
+		this.apps.clear();
+	}
+
+	/**
+	 * Gets a command object for the specified parameters (if command does not exists, will returns null)
 	 * @param appID The application ID (not null or empty)
 	 * @param appVersion The application version (optional, when it is null, the default value is "1.0.0")
-	 * @param moduleID The module ID in application (optional, if you want to get a command in global module, set it to null)
+	 * @param moduleID The module ID in application (not null or empty)
 	 * @param actorID Actor ID in module (not null or empty, equivalent to page ID)
 	 * @param cmd The command ID in the actor (not null or empty)
 	 * @param enabledOnly If it is set to true, returns enabled command only; otherwise, the disabled command can be returned

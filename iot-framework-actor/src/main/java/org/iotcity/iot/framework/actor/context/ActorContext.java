@@ -1,5 +1,6 @@
 package org.iotcity.iot.framework.actor.context;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,13 +15,13 @@ public class ActorContext {
 	// --------------------------- Public fields ----------------------------
 
 	/**
-	 * (Readonly) Application ID (not null or empty)
+	 * (Readonly) The module to which this actor belongs (not null)
 	 */
-	public final String appID;
+	public final ModuleContext module;
 	/**
-	 * (Readonly) Module ID in application (not null, the empty value indicates that the module belongs to the global module)
+	 * (Readonly) The permission handler of this actor (not null)
 	 */
-	public final String moduleID;
+	public final PermissionHandler permission;
 	/**
 	 * (Readonly) Actor ID in module (not null or empty, equivalent to page ID)
 	 */
@@ -35,9 +36,9 @@ public class ActorContext {
 	 */
 	public boolean enabled;
 	/**
-	 * Description of this actor
+	 * Document description of this actor
 	 */
-	public String desc;
+	public String doc;
 
 	// --------------------------- Private fields ----------------------------
 
@@ -51,23 +52,23 @@ public class ActorContext {
 
 	/**
 	 * Constructor for actor context
-	 * @param appID Application ID (not null or empty)
-	 * @param moduleID Module ID in application (optional, null or empty value indicates that the module belongs to the global module)
+	 * @param module The module to which this actor belongs (not null)
+	 * @param permission The permission handler of this actor (not null)
 	 * @param actorID Actor ID in module (not null or empty, equivalent to page ID)
 	 * @param actorClass The actor class (not null)
 	 * @param enabled Whether to enable this actor
-	 * @param desc Description of this actor
+	 * @param doc Document description of this actor
 	 */
-	public ActorContext(String appID, String moduleID, String actorID, Class<?> actorClass, boolean enabled, String desc) {
-		if (StringHelper.isEmpty(appID) || StringHelper.isEmpty(actorID) || actorClass == null) {
-			throw new IllegalArgumentException("Parameter appID, actorID and actorClass can not be null or empty!");
+	ActorContext(ModuleContext module, PermissionHandler permission, String actorID, Class<?> actorClass, boolean enabled, String doc) {
+		if (module == null || permission == null || StringHelper.isEmpty(actorID) || actorClass == null) {
+			throw new IllegalArgumentException("Parameter module, permission, actorID and actorClass can not be null or empty!");
 		}
-		this.appID = appID;
-		this.moduleID = (moduleID == null ? "" : moduleID);
+		this.module = module;
+		this.permission = permission;
 		this.actorID = actorID;
 		this.actorClass = actorClass;
 		this.enabled = enabled;
-		this.desc = desc;
+		this.doc = doc;
 	}
 
 	// --------------------------- Public methods ----------------------------
@@ -81,16 +82,25 @@ public class ActorContext {
 	}
 
 	/**
-	 * Add a command to this actor, if the command.cmd has been added in this actor, it will be replaced by current command object.
-	 * @param command Command context object (not null)
+	 * Add a command to this actor, if the command.cmd has been created in this actor, it will return the existing command object directly.
+	 * @param permission The permission handler of this command (not null)
+	 * @param cmd Command ID (not null or empty)
+	 * @param method The method of this command is already bound (not null)
+	 * @param enabled Whether to enable this command
+	 * @param doc Document description of this command
+	 * @return CommandContext The command context that be created in this actor (returns null if the cmd is invalid)
 	 */
-	public void addCommand(CommandContext command) {
-		if (command == null) return;
+	public synchronized CommandContext addCommand(PermissionHandler permission, String cmd, Method method, boolean enabled, String doc) {
+		if (StringHelper.isEmpty(cmd)) return null;
+		CommandContext command = this.commands.get(cmd.toUpperCase());
+		if (command != null) return command;
+		command = new CommandContext(this, permission, cmd, method, enabled, doc);
 		this.commands.put(command.cmd.toUpperCase(), command);
+		return command;
 	}
 
 	/**
-	 * Gets a command object of the specified command cmd (if cmd does not exists in this actor, will returns null)
+	 * Gets a command object for the specified command cmd (if cmd does not exists in this actor, will returns null)
 	 * @param cmd The command ID in this actor
 	 * @return CommandContext Command context object or null
 	 */
@@ -114,9 +124,16 @@ public class ActorContext {
 	 * @param cmd The command ID in this actor
 	 * @return CommandContext The command context object that be removed, will returns null if mismatch.
 	 */
-	public CommandContext removeCommand(String cmd) {
+	public synchronized CommandContext removeCommand(String cmd) {
 		if (StringHelper.isEmpty(cmd)) return null;
 		return this.commands.remove(cmd.toUpperCase());
+	}
+
+	/**
+	 * Clear all commands in current actor
+	 */
+	public synchronized void clearCommands() {
+		this.commands.clear();
 	}
 
 }

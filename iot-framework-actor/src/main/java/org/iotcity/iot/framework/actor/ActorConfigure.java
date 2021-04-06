@@ -22,6 +22,7 @@ public class ActorConfigure {
 	 * @param fromPackage Whether load the file from package
 	 */
 	public void config(ActorManager manager, String configFile, boolean fromPackage) {
+
 		// Load file properties
 		Properties props = PropertiesLoader.loadProperties(configFile, "UTF-8", fromPackage);
 		if (props == null) return;
@@ -30,24 +31,26 @@ public class ActorConfigure {
 		if (apps == null || apps.length() == 0) return;
 		String[] keys = apps.split("[,;]");
 		if (keys == null || keys.length == 0) return;
+
 		// Traverse all application configurations
 		for (int i = 0, c = keys.length; i < c; i++) {
 			String appKey = keys[i].trim();
 			if (appKey.length() == 0) continue;
+
 			// Load application configure
 			ApplicationConfig config = PropertiesLoader.loadConfig(ApplicationConfig.class, configFile, "UTF-8", "iot.framework.actor.apps." + appKey, fromPackage);
 			if (config == null || StringHelper.isEmpty(config.appID)) continue;
 			if (config.packages == null || config.packages.length == 0) continue;
+
 			// Create application
-			ApplicationContext app = new ApplicationContext(config.appID, config.version, config.enabled, config.desc);
+			ApplicationContext app = manager.addApplication(config.appID, config.version, config.enabled, config.doc);
+
 			// Create the analyzer
 			AnnotationAnalyzer analyzer = new AnnotationAnalyzer();
 			analyzer.addAllPackages(config.packages, config.ignorePackages);
 			analyzer.addParser(new ActorAnnotationParser(app));
 			// Start analyzer
 			analyzer.start();
-			// Add application to manager
-			manager.addApplication(app);
 		}
 	}
 
