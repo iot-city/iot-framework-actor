@@ -1,4 +1,4 @@
-package org.iotcity.iot.framework.actor;
+package org.iotcity.iot.framework.actor.beans;
 
 /**
  * The actor factory to get an actor instance
