@@ -93,7 +93,11 @@ public class ActorContext {
 	public synchronized CommandContext addCommand(PermissionHandler permission, String cmd, Method method, boolean enabled, String doc) {
 		if (StringHelper.isEmpty(cmd)) return null;
 		CommandContext command = this.commands.get(cmd.toUpperCase());
-		if (command != null) return command;
+		if (command != null && command.method == method) return command;
+		if (command != null) {
+			// Prompt the duplicate command information
+			System.err.println("There is a duplicate command with the same command cmd \"" + cmd + "\" under the actor \"" + this.actorID + "\", and the original method of command \"" + command.method.getName() + "\" has been replaced by the new one \"" + method.getName() + "\".");
+		}
 		command = new CommandContext(this, permission, cmd, method, enabled, doc);
 		this.commands.put(command.cmd.toUpperCase(), command);
 		return command;

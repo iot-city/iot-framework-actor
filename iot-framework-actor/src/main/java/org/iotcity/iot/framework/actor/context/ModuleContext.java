@@ -80,7 +80,11 @@ public class ModuleContext {
 	public synchronized ActorContext addActor(PermissionHandler permission, String actorID, Class<?> actorClass, boolean enabled, String doc) {
 		if (StringHelper.isEmpty(actorID)) return null;
 		ActorContext actor = this.actors.get(actorID.toUpperCase());
-		if (actor != null) return actor;
+		if (actor != null && actor.actorClass == actorClass) return actor;
+		if (actor != null) {
+			// Prompt the duplicate actor information
+			System.err.println("There is a duplicate actor with the same actor ID \"" + actorID + "\" under the module \"" + this.moduleID + "\", and the original actor \"" + actor.actorClass.getName() + "\" has been replaced by the new one \"" + actorClass.getName() + "\".");
+		}
 		actor = new ActorContext(this, permission, actorID, actorClass, enabled, doc);
 		this.actors.put(actor.actorID.toUpperCase(), actor);
 		return actor;
