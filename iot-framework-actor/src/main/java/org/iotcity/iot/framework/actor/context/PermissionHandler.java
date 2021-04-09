@@ -7,7 +7,7 @@ import java.util.Set;
  * Permission handler for business logic access authorization
  * @author Ardon
  */
-public class PermissionHandler {
+public final class PermissionHandler {
 
 	/**
 	 * The permission values set
@@ -36,7 +36,7 @@ public class PermissionHandler {
 	/**
 	 * Determine whether the permission value exists
 	 * @param value The permission value
-	 * @return Returns true if permission value already exists; otherwise, returns false
+	 * @return boolean Returns true if permission value already exists; otherwise, returns false
 	 */
 	public boolean hasPermission(int value) {
 		return this.values.contains(value);

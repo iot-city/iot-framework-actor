@@ -3,53 +3,33 @@ package org.iotcity.iot.framework.actor.beans;
 import java.io.Serializable;
 
 /**
- * Actor response data object
+ * Actor response data
  * @author Ardon
  */
-public class ActorResponse {
+public interface ActorResponse {
 
 	/**
-	 * Response status (refer to ActorResponseStatus.XXXX)
+	 * Get response status (refer to ActorResponseStatus.XXXX)
+	 * @return ActorResponseStatus Response status
 	 */
-	public final ActorResponseStatus status;
-	/**
-	 * Response message (usually used in response to result prompt, set to null if not required)
-	 */
-	public final String msg;
-	/**
-	 * Reference notes (usually used for program debugging, set to null if not required)
-	 */
-	public final String ref;
-	/**
-	 * The business response data from method (optional)
-	 */
-	public final Serializable data;
+	public ActorResponseStatus getStatus();
 
 	/**
-	 * Constructor for actor response data
-	 * @param status Response status (refer to ActorResponseStatus.XXXX)
-	 * @param msg Response message (usually used in response to result prompt, set to null if not required)
-	 * @param ref Reference notes (usually used for program debugging, set to null if not required)
-	 * @param data The business response data from method (optional)
+	 * Get response message (usually used in response to result prompt, it is null if not required)
+	 * @return String Response message
 	 */
-	public ActorResponse(ActorResponseStatus status, String msg, String ref, Serializable data) {
-		this.status = status;
-		this.msg = msg;
-		this.ref = ref;
-		this.data = data;
-	}
+	public String getMessage();
 
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("{status=");
-		sb.append(this.status);
-		sb.append(", msg=");
-		sb.append(msg);
-		sb.append(", ref=");
-		sb.append(ref);
-		sb.append("}");
-		return sb.toString();
-	}
+	/**
+	 * Get reference notes (usually used for program debugging, it is null if not required)
+	 * @return String Reference notes
+	 */
+	public String getReference();
+
+	/**
+	 * Get business response data from method (optional, it is null if not required)
+	 * @return Serializable The business response data
+	 */
+	public Serializable getData();
 
 }

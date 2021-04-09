@@ -10,7 +10,7 @@ import org.iotcity.iot.framework.core.util.helper.StringHelper;
  * The application context
  * @author Ardon
  */
-public class ApplicationContext {
+public final class ApplicationContext {
 
 	// --------------------------- Public fields ----------------------------
 

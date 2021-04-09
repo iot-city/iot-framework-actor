@@ -1,5 +1,6 @@
 package org.iotcity.iot.framework.actor.annotation;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 
 import org.iotcity.iot.framework.actor.context.ActorContext;
@@ -55,6 +56,12 @@ public class ActorAnnotationParser implements AnnotationParser {
 		// Traversing methods
 		for (Method method : methods) {
 			if (!method.isAnnotationPresent(Command.class)) continue;
+			// Verify serializable return type
+			Class<?> returnType = method.getReturnType();
+			if (returnType != Void.class && !returnType.isPrimitive() && !(returnType instanceof Serializable)) {
+				System.err.println("Command method \"" + clazz.getName() + "." + method.getName() + "(...)\" return type \"" + method.getReturnType().getClass().getName() + "\" must be a void, primitive type or a type implement serializable interface!");
+				continue;
+			}
 
 			// Get command annotation
 			Command command = method.getAnnotation(Command.class);
@@ -70,7 +77,7 @@ public class ActorAnnotationParser implements AnnotationParser {
 			phandler = new PermissionHandler(licenses);
 
 			// Create command context
-			actorContext.addCommand(phandler, cmd, method, command.enabled(), command.doc());
+			actorContext.addCommand(phandler, cmd, method, command.timeout(), command.async(), command.enabled(), command.doc());
 		}
 	}
 

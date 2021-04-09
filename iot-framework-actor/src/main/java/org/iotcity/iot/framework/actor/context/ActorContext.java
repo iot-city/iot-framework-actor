@@ -10,7 +10,7 @@ import org.iotcity.iot.framework.core.util.helper.StringHelper;
  * Actor context (equivalent to page)
  * @author Ardon
  */
-public class ActorContext {
+public final class ActorContext {
 
 	// --------------------------- Public fields ----------------------------
 
@@ -86,11 +86,13 @@ public class ActorContext {
 	 * @param permission The permission handler of this command (not null)
 	 * @param cmd Command ID (not null or empty)
 	 * @param method The method of this command is already bound (not null)
+	 * @param timeout Response timeout milliseconds (60,000ms by default)
+	 * @param async Whether as an asynchronous callback method (false by default)
 	 * @param enabled Whether to enable this command
 	 * @param doc Document description of this command
 	 * @return CommandContext The command context that be created in this actor (returns null if the cmd is invalid)
 	 */
-	public synchronized CommandContext addCommand(PermissionHandler permission, String cmd, Method method, boolean enabled, String doc) {
+	public synchronized CommandContext addCommand(PermissionHandler permission, String cmd, Method method, long timeout, boolean async, boolean enabled, String doc) {
 		if (StringHelper.isEmpty(cmd)) return null;
 		CommandContext command = this.commands.get(cmd.toUpperCase());
 		if (command != null && command.method == method) return command;
@@ -98,7 +100,7 @@ public class ActorContext {
 			// Prompt the duplicate command information
 			System.err.println("There is a duplicate command with the same command cmd \"" + cmd + "\" under the actor \"" + this.actorID + "\", and the original method of command \"" + command.method.getName() + "\" has been replaced by the new one \"" + method.getName() + "\".");
 		}
-		command = new CommandContext(this, permission, cmd, method, enabled, doc);
+		command = new CommandContext(this, permission, cmd, method, timeout, async, enabled, doc);
 		this.commands.put(command.cmd.toUpperCase(), command);
 		return command;
 	}

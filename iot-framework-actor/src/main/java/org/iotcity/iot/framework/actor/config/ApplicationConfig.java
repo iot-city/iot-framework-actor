@@ -4,7 +4,7 @@ package org.iotcity.iot.framework.actor.config;
  * Application configure bean
  * @author Ardon
  */
-public class ApplicationConfig {
+public final class ApplicationConfig {
 
 	/**
 	 * The application ID

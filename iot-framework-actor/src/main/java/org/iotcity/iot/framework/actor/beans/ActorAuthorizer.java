@@ -14,6 +14,6 @@ public interface ActorAuthorizer {
 	 * @param command Command object that need to verify permissions (not null)
 	 * @return boolean Whether pass the permission verification
 	 */
-	boolean verifyPomission(ActorRequest request, CommandContext command);
+	boolean verifyPermission(ActorRequest request, CommandContext command);
 
 }

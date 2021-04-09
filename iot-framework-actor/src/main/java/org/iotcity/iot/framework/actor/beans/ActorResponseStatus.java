@@ -30,9 +30,13 @@ public enum ActorResponseStatus {
 	 */
 	TIMEOUT,
 	/**
-	 * The request method specified in the request was not found in actor manager
+	 * The request was rejected by the actor factory
 	 */
-	METHOD_NOT_FOUND,
+	REJECT,
+	/**
+	 * The actor or method specified in the request was not found in actor manager
+	 */
+	NOT_FOUND,
 	/**
 	 * The current request parameters does not match the method parameters
 	 */

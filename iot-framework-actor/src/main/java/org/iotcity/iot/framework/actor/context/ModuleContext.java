@@ -9,7 +9,7 @@ import org.iotcity.iot.framework.core.util.helper.StringHelper;
  * The module context
  * @author Ardon
  */
-public class ModuleContext {
+public final class ModuleContext {
 
 	// --------------------------- Public fields ----------------------------
 
