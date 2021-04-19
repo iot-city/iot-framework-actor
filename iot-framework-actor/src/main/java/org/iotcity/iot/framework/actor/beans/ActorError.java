@@ -1,7 +1,7 @@
 package org.iotcity.iot.framework.actor.beans;
 
 /**
- * Actor runtime error object
+ * Actor runtime error object.
  * @author Ardon
  */
 public class ActorError extends Exception {
@@ -12,8 +12,8 @@ public class ActorError extends Exception {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Constructor for actor runtime error
-	 * @param message Error message (require, not null or empty, usually used in response to result prompt)
+	 * Constructor for actor runtime error.
+	 * @param message Error message (require, not null or empty, usually used in response to result prompt).
 	 */
 	public ActorError(String message) {
 		super(message, null, false, false);

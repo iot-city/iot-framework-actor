@@ -8,11 +8,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * The command actor annotation<br/>
+ * The command actor annotation.<br/>
  * For example, set up an actor for class:<br/>
  * 
  * <pre>
- *    &#064;Actor(moduleID = "User-Center", actorID = "User", doc = "The actor for user object")
+ *    &#064;Actor(moduleID = "User-Center", actorID = "User", doc = "The actor for user module")
  *    public class UserActor {
  *        ...
  *    }
@@ -26,22 +26,22 @@ import java.lang.annotation.Target;
 public @interface Actor {
 
 	/**
-	 * The module ID to which this actor belongs (required, not null or empty)
+	 * The module ID to which this actor belongs (required, not null or empty).
 	 */
 	String moduleID();
 
 	/**
-	 * Actor ID in module (required, equivalent to page ID, not null or empty)
+	 * Actor ID in module (required, equivalent to page ID, not null or empty).
 	 */
 	String actorID();
 
 	/**
-	 * Document description of this actor (required, cannot be null or empty)
+	 * Document description of this actor (required, cannot be null or empty).
 	 */
 	String doc();
 
 	/**
-	 * Whether to enable this actor (optional, true by default)
+	 * Whether to enable this actor (optional, true by default).
 	 */
 	boolean enabled() default true;
 

@@ -3,33 +3,33 @@ package org.iotcity.iot.framework.actor.beans;
 import java.io.Serializable;
 
 /**
- * Actor response data
+ * Actor response data.
  * @author Ardon
  */
 public interface ActorResponse {
 
 	/**
-	 * Get response status (refer to ActorResponseStatus.XXXX)
-	 * @return ActorResponseStatus Response status
+	 * Get response status (refer to ActorResponseStatus.XXXX).
+	 * @return Response status.
 	 */
-	public ActorResponseStatus getStatus();
+	ActorResponseStatus getStatus();
 
 	/**
-	 * Get response message (usually used in response to result prompt, it is null if not required)
-	 * @return String Response message
+	 * Get response message (usually used in response to result prompt, it is null if not required).
+	 * @return Response message.
 	 */
-	public String getMessage();
+	String getMessage();
 
 	/**
-	 * Get reference notes (usually used for program debugging, it is null if not required)
-	 * @return String Reference notes
+	 * Get reference notes (usually used for program debugging, it is null if not required).
+	 * @return Reference notes.
 	 */
-	public String getReference();
+	String getReference();
 
 	/**
-	 * Get business response data from method (optional, it is null if not required)
-	 * @return Serializable The business response data
+	 * Get business response data from method (optional, it is null if not required).
+	 * @return The business response data.
 	 */
-	public Serializable getData();
+	Serializable getData();
 
 }

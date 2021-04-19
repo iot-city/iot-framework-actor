@@ -1,58 +1,200 @@
 package org.iotcity.iot.framework.actor;
 
-import java.util.Properties;
+import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.iotcity.iot.framework.actor.annotation.ActorAnnotationParser;
+import org.iotcity.iot.framework.actor.annotation.Actor;
+import org.iotcity.iot.framework.actor.annotation.Command;
+import org.iotcity.iot.framework.actor.annotation.Permission;
 import org.iotcity.iot.framework.actor.config.ApplicationConfig;
+import org.iotcity.iot.framework.actor.config.ApplicationConfigPool;
+import org.iotcity.iot.framework.actor.context.ActorContext;
 import org.iotcity.iot.framework.actor.context.ApplicationContext;
+import org.iotcity.iot.framework.actor.context.ModuleContext;
+import org.iotcity.iot.framework.actor.context.PermissionHandler;
 import org.iotcity.iot.framework.core.annotation.AnnotationAnalyzer;
+import org.iotcity.iot.framework.core.annotation.AnnotationParser;
+import org.iotcity.iot.framework.core.config.Configurable;
+import org.iotcity.iot.framework.core.config.PropertiesConfigure;
+import org.iotcity.iot.framework.core.i18n.LocaleText;
+import org.iotcity.iot.framework.core.logging.Logger;
 import org.iotcity.iot.framework.core.util.config.PropertiesLoader;
 import org.iotcity.iot.framework.core.util.helper.StringHelper;
+import org.iotcity.iot.framework.core.util.task.TaskHandler;
 
 /**
- * Manage actor annotations by using property config in this action configure
+ * Manage actor annotations by using properties file in this action configure.
  * @author Ardon
  */
-public class ActorConfigure {
+public class ActorConfigure extends PropertiesConfigure<ApplicationContext[]> {
+
+	// --------------------------- Constructor ----------------------------
 
 	/**
-	 * Load application configure and parse the annotations to the actor manager
-	 * @param manager The actor manager to execute the configuration results
-	 * @param configFile The application configure properties file (e.g. "org/iotcity/iot/framework/actor/iot-actor.properties")
-	 * @param fromPackage Whether load the file from package
-	 * @throws Exception Throw an exception when an error is encountered
+	 * Constructor for automatic properties configuration object.<br/>
+	 * <b>(Actor configure template file: "org/iotcity/iot/framework/actor/iot-actor-template.properties")</b>
+	 * @param configFile The configure properties file to load (required, not null or empty).
+	 * @param fromPackage Whether load the file from package.
+	 * @throws IllegalArgumentException An error is thrown when the parameter is null.
 	 */
-	public void config(ActorManager manager, String configFile, boolean fromPackage) throws Exception {
+	public ActorConfigure(String configFile, boolean fromPackage) {
+		super(configFile, fromPackage);
+	}
 
-		// Load file properties
-		Properties props = PropertiesLoader.loadProperties(configFile, "UTF-8", fromPackage);
-		if (props == null) return;
+	/**
+	 * Constructor for automatic properties configuration object.<br/>
+	 * <b>(Actor configure template file: "org/iotcity/iot/framework/actor/iot-actor-template.properties")</b>
+	 * @param configFile The configure properties file to load (required, not null or empty).
+	 * @param encoding Text encoding (optional, e.g. "UTF-8", if it is set to null, it will be judged automatically).
+	 * @param fromPackage Whether load the file from package.
+	 * @throws IllegalArgumentException An error is thrown when the parameter is null.
+	 */
+	public ActorConfigure(String configFile, String encoding, boolean fromPackage) {
+		super(configFile, encoding, fromPackage);
+	}
+
+	// --------------------------- Public Methods ----------------------------
+
+	@Override
+	public boolean config(Configurable<ApplicationContext[]> configurable, boolean reset) {
+		// Verify configurable object class
+		if (configurable == null || !(configurable instanceof ActorManager)) return false;
+
 		// Get application configure keys
 		String apps = props.getProperty("iot.framework.actor.apps");
-		if (apps == null || apps.length() == 0) return;
+		if (apps == null || apps.length() == 0) return false;
 		String[] keys = apps.split("[,;]");
-		if (keys == null || keys.length == 0) return;
+		if (keys == null || keys.length == 0) return false;
 
+		// Create list
+		List<ApplicationContext> list = new ArrayList<>();
 		// Traverse all application configurations
 		for (int i = 0, c = keys.length; i < c; i++) {
 			String appKey = keys[i].trim();
 			if (appKey.length() == 0) continue;
 
 			// Load application configure
-			ApplicationConfig config = PropertiesLoader.loadConfig(ApplicationConfig.class, configFile, "UTF-8", "iot.framework.actor.apps." + appKey, fromPackage);
+			ApplicationConfig config = PropertiesLoader.getConfigBean(ApplicationConfig.class, props, "iot.framework.actor.apps." + appKey);
 			if (config == null || StringHelper.isEmpty(config.appID)) continue;
 			if (config.packages == null || config.packages.length == 0) continue;
 
+			// The task handler object
+			TaskHandler taskHandler;
+			// Get pool configure
+			ApplicationConfigPool pool = config.pool;
+			if (pool == null) {
+				taskHandler = TaskHandler.instance;
+			} else {
+				taskHandler = new TaskHandler("TASK-" + config.appID, pool.corePoolSize, pool.maximumPoolSize, pool.keepAliveTime, pool.capacity);
+			}
+
 			// Create application
-			ApplicationContext app = manager.addApplication(config.appID, config.version, config.enabled, config.doc);
+			ApplicationContext app = new ApplicationContext((ActorManager) configurable, taskHandler, config.appID, config.version, config.enabled, config.doc);
+			// Add to list
+			list.add(app);
 
 			// Create the analyzer
 			AnnotationAnalyzer analyzer = new AnnotationAnalyzer();
 			analyzer.addAllPackages(config.packages, config.ignorePackages);
 			analyzer.addParser(new ActorAnnotationParser(app));
-			// Start analyzer
-			analyzer.start();
+			try {
+				// Start analyzer
+				analyzer.start();
+			} catch (Exception e) {
+				// Logs error message
+				FrameworkActor.getLogger().error(FrameworkActor.getLocale().text("actor.config.parse.error", e.getMessage()), e);
+			}
 		}
+
+		// Returns config status
+		return configurable.config(list.toArray(new ApplicationContext[list.size()]), reset);
+	}
+
+	/**
+	 * Annotation parser for actor annotation classes
+	 * @author Ardon
+	 */
+	public class ActorAnnotationParser implements AnnotationParser {
+
+		/**
+		 * Application context object
+		 */
+		private final ApplicationContext app;
+		/**
+		 * The logger object.
+		 */
+		private final Logger logger;
+		/**
+		 * The locale object.
+		 */
+		private final LocaleText locale;
+
+		/**
+		 * Constructor for actor annotation parser
+		 * @param app Application context object (not null)
+		 */
+		public ActorAnnotationParser(ApplicationContext app) {
+			if (app == null) throw new IllegalArgumentException("Parameter app can not be null!");
+			this.app = app;
+			this.logger = FrameworkActor.getLogger();
+			this.locale = FrameworkActor.getLocale();
+		}
+
+		@Override
+		public void parse(Class<?> clazz) {
+			if (!clazz.isAnnotationPresent(Actor.class)) return;
+
+			// Get actor annotation
+			Actor actor = clazz.getAnnotation(Actor.class);
+			String actorID = StringHelper.trim(actor.actorID());
+			String moduleID = StringHelper.trim(actor.moduleID());
+
+			// Create or get a module context
+			ModuleContext module = this.app.addModule(moduleID, true, "");
+
+			// Create or get an actor context
+			int[] licenses = null;
+			if (clazz.isAnnotationPresent(Permission.class)) {
+				Permission permission = clazz.getAnnotation(Permission.class);
+				if (permission != null) licenses = permission.value();
+			}
+			PermissionHandler phandler = new PermissionHandler(licenses);
+			ActorContext actorContext = module.addActor(phandler, actorID, clazz, actor.enabled(), actor.doc());
+
+			// Analyze methods
+			Method[] methods = clazz.getMethods();
+			// Traversing methods
+			for (Method method : methods) {
+				if (!method.isAnnotationPresent(Command.class)) continue;
+
+				// Get command annotation
+				Command command = method.getAnnotation(Command.class);
+				String cmd = StringHelper.trim(command.cmd());
+				if (cmd.length() == 0) continue;
+
+				// Verify serializable return type
+				Class<?> returnType = method.getReturnType();
+				if (returnType != Void.class && !returnType.isPrimitive() && !(returnType instanceof Serializable)) {
+					// Logs error message
+					logger.error(locale.text("actor.config.method.error", cmd, clazz.getName(), method.getName(), method.getReturnType().getClass().getName()));
+					continue;
+				}
+
+				// Get permission annotation of command
+				licenses = null;
+				if (method.isAnnotationPresent(Permission.class)) {
+					Permission permission = method.getAnnotation(Permission.class);
+					if (permission != null) licenses = permission.value();
+				}
+				phandler = new PermissionHandler(licenses);
+
+				// Create command context
+				actorContext.addCommand(phandler, cmd, method, command.timeout(), command.async(), command.enabled(), command.doc());
+			}
+		}
+
 	}
 
 }

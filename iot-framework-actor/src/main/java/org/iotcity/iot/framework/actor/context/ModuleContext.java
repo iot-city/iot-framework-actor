@@ -3,10 +3,11 @@ package org.iotcity.iot.framework.actor.context;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.iotcity.iot.framework.actor.FrameworkActor;
 import org.iotcity.iot.framework.core.util.helper.StringHelper;
 
 /**
- * The module context
+ * The module context.
  * @author Ardon
  */
 public final class ModuleContext {
@@ -14,27 +15,27 @@ public final class ModuleContext {
 	// --------------------------- Public fields ----------------------------
 
 	/**
-	 * (Readonly) The application to which this module belongs (not null)
+	 * (Readonly) The application to which this module belongs (not null).
 	 */
 	public final ApplicationContext app;
 	/**
-	 * (Readonly) Module ID in application (not null or empty)
+	 * (Readonly) Module ID in application (not null or empty).
 	 */
 	public final String moduleID;
 	/**
-	 * Whether to enable this module<br/>
+	 * Whether to enable this module.<br/>
 	 * You can set it <b>false</b> value to disable this module in runtime.
 	 */
 	public boolean enabled;
 	/**
-	 * Document description of this module
+	 * Document description of this module.
 	 */
 	public String doc;
 
 	// --------------------------- Private fields ----------------------------
 
 	/**
-	 * Actors in this module<br/>
+	 * Actors in this module.<br/>
 	 * The key is actor ID (upper case), the value is actor context object.
 	 */
 	private final Map<String, ActorContext> actors = new HashMap<>();
@@ -42,11 +43,11 @@ public final class ModuleContext {
 	// --------------------------- Constructor ----------------------------
 
 	/**
-	 * Constructor for module context
-	 * @param app The application to which the module belongs (not null)
-	 * @param moduleID Module ID in application (not null or empty)
-	 * @param enabled Whether to enable this module
-	 * @param doc Document description of this module
+	 * Constructor for module context.
+	 * @param app The application to which the module belongs (not null).
+	 * @param moduleID Module ID in application (not null or empty).
+	 * @param enabled Whether to enable this module.
+	 * @param doc Document description of this module.
 	 */
 	ModuleContext(ApplicationContext app, String moduleID, boolean enabled, String doc) {
 		if (app == null || StringHelper.isEmpty(moduleID)) {
@@ -61,8 +62,16 @@ public final class ModuleContext {
 	// --------------------------- Public methods ----------------------------
 
 	/**
-	 * Gets all actors in this module
-	 * @return ActorContext[] All actors in this module
+	 * Gets actors size.
+	 * @return Actors size.
+	 */
+	public int getActorSize() {
+		return this.actors.size();
+	}
+
+	/**
+	 * Gets all actors in this module.
+	 * @return All actors in this module.
 	 */
 	public ActorContext[] getAllActors() {
 		return this.actors.values().toArray(new ActorContext[this.actors.size()]);
@@ -70,12 +79,12 @@ public final class ModuleContext {
 
 	/**
 	 * Add an actor to this module, if the actor ID has been created in this module, it will return the existing actor object directly.
-	 * @param permission The permission handler of this actor (not null)
-	 * @param actorID Actor ID in module (not null or empty, equivalent to page ID)
-	 * @param actorClass The actor class (not null)
-	 * @param enabled Whether to enable this actor
-	 * @param doc Document description of this actor
-	 * @return ActorContext The actor context that be created in this module (returns null if the actorID is invalid)
+	 * @param permission The permission handler of this actor (not null).
+	 * @param actorID Actor ID in module (not null or empty, equivalent to page ID).
+	 * @param actorClass The actor class (not null).
+	 * @param enabled Whether to enable this actor.
+	 * @param doc Document description of this actor.
+	 * @return The actor context that be created in this module (returns null if the actorID is invalid).
 	 */
 	public synchronized ActorContext addActor(PermissionHandler permission, String actorID, Class<?> actorClass, boolean enabled, String doc) {
 		if (StringHelper.isEmpty(actorID)) return null;
@@ -83,7 +92,9 @@ public final class ModuleContext {
 		if (actor != null && actor.actorClass == actorClass) return actor;
 		if (actor != null) {
 			// Prompt the duplicate actor information
-			System.err.println("There is a duplicate actor with the same actor ID \"" + actorID + "\" under the module \"" + this.moduleID + "\", and the original actor \"" + actor.actorClass.getName() + "\" has been replaced by the new one \"" + actorClass.getName() + "\".");
+			String msg = FrameworkActor.getLocale().text("actor.context.module.error", actorID, this.moduleID, actor.actorClass.getName(), actorClass.getName());
+			// Logs a message
+			FrameworkActor.getLogger().warn(msg);
 		}
 		actor = new ActorContext(this, permission, actorID, actorClass, enabled, doc);
 		this.actors.put(actor.actorID.toUpperCase(), actor);
@@ -91,9 +102,9 @@ public final class ModuleContext {
 	}
 
 	/**
-	 * Gets an actor object for the specified actor ID (if actor ID does not exists in current module, will returns null)
-	 * @param actorID The actor ID in this module
-	 * @return ActorContext Actor context object or null
+	 * Gets an actor object for the specified actor ID (if actor ID does not exists in current module, will returns null).
+	 * @param actorID The actor ID in this module.
+	 * @return Actor context object or null.
 	 */
 	public ActorContext getActor(String actorID) {
 		if (StringHelper.isEmpty(actorID)) return null;
@@ -101,9 +112,9 @@ public final class ModuleContext {
 	}
 
 	/**
-	 * Determine whether the specified actor ID exists
-	 * @param actorID The actor ID in this module
-	 * @return boolean Returns true if actor ID already exists; otherwise, returns false
+	 * Determine whether the specified actor ID exists.
+	 * @param actorID The actor ID in this module.
+	 * @return Returns true if actor ID already exists; otherwise, returns false.
 	 */
 	public boolean hasActor(String actorID) {
 		if (StringHelper.isEmpty(actorID)) return false;
@@ -111,9 +122,9 @@ public final class ModuleContext {
 	}
 
 	/**
-	 * Remove an actor object by the specified actor ID
-	 * @param actorID The actor ID in this module
-	 * @return ActorContext The actor context object that be removed, will returns null if mismatch.
+	 * Remove an actor object by the specified actor ID.
+	 * @param actorID The actor ID in this module.
+	 * @return The actor context object that be removed, will returns null if mismatch.
 	 */
 	public synchronized ActorContext removeActor(String actorID) {
 		if (StringHelper.isEmpty(actorID)) return null;
@@ -121,7 +132,7 @@ public final class ModuleContext {
 	}
 
 	/**
-	 * Clear all actors in current module
+	 * Clear all actors in current module.
 	 */
 	public synchronized void clearActors() {
 		this.actors.clear();

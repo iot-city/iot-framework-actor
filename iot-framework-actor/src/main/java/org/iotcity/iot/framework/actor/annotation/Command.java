@@ -8,7 +8,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Command annotation<br/>
+ * Command annotation for method invoking.<br/>
  * For example, set up a command for the method:<br/>
  * 
  * <pre>
@@ -19,7 +19,7 @@ import java.lang.annotation.Target;
  * </pre>
  * 
  * <b>Important: </b><br/>
- * Command method return type must be a void, primitive type or a type implement serializable interface.
+ * Return type of command method can include a void, primitive type or a type implement serializable interface.
  * @author Ardon
  */
 @Documented
@@ -28,27 +28,29 @@ import java.lang.annotation.Target;
 public @interface Command {
 
 	/**
-	 * The command ID to access this method (required, not null or empty)
+	 * The command ID to access this method (required, not null or empty).
 	 */
 	String cmd();
 
 	/**
-	 * Document description of this command (required, cannot be null or empty)
+	 * Document description of this command (required, cannot be null or empty).
 	 */
 	String doc();
 
 	/**
-	 * Response timeout milliseconds (optional, 60000ms by default)
+	 * Response timeout milliseconds (optional, 60000ms by default).
 	 */
 	long timeout() default 60000;
 
 	/**
-	 * Whether as an asynchronous callback method (optional, false by default)
+	 * Whether as an asynchronous callback method (optional, false by default).</br>
+	 * This property needs to cooperate with the implementation of {@link AsyncCallback} interface.</br>
+	 * You can get the asynchronous callback object through {@link ActorThreadLocal}.getAsyncCallback() in your business logic.
 	 */
 	boolean async() default false;
 
 	/**
-	 * Whether to enable this command (optional, true by default)
+	 * Whether to enable this command (optional, true by default).
 	 */
 	boolean enabled() default true;
 

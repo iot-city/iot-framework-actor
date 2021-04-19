@@ -9,8 +9,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Business logic access authorization configuration<br/>
- * It should be used with <b>@Actor</b> or <b>@Command</b> annotation<br/>
+ * Business logic access authorization configuration.<br/>
+ * It should be used with <b>@Actor</b> or <b>@Command</b> annotation.<br/>
  * <br/>
  * Example 1, set up default authorization for the method:<br/>
  * 
@@ -55,7 +55,7 @@ import java.lang.annotation.Target;
  * 
  * <b>Note: </b><br/>
  * 1. UseAuthorization.XXXX is an int permission identifier defined according to business logic, you need to defined it by yourself.<br/>
- * 2. The integer authorization number needs to be defined in the following way: UseAuthorization.XXXX = 2^n<br/>
+ * 2. The integer authorization number can be defined in the following way: UseAuthorization.XXXX = 2^n.<br/>
  * 3. The default value of permission annotation is 0, which can be set as a permission that only be accessed after login.<br/>
  * <br/>
  * Example for permission identifier:
@@ -85,7 +85,7 @@ import java.lang.annotation.Target;
 public @interface Permission {
 
 	/**
-	 * Authorized access integer defined by business logic (optional, 0 by default)
+	 * Authorized access integer defined by business logic (optional, 0 by default).
 	 */
 	int[] value() default 0;
 

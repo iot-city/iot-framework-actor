@@ -7,38 +7,39 @@ import org.iotcity.iot.framework.actor.context.ActorContext;
 import org.iotcity.iot.framework.actor.context.ApplicationContext;
 import org.iotcity.iot.framework.actor.context.CommandContext;
 import org.iotcity.iot.framework.actor.context.ModuleContext;
+import org.iotcity.iot.framework.core.config.Configurable;
 import org.iotcity.iot.framework.core.util.helper.StringHelper;
 
 /**
- * Actor manager of framework
+ * Actor manager to manage applications.
  * @author Ardon
  */
-public class ActorManager {
+public class ActorManager implements Configurable<ApplicationContext[]> {
 
 	// --------------------------- Private fields ----------------------------
 
 	/**
 	 * All applications, the key is application appID|version(upper case), the value is application context object.
 	 */
-	private final Map<String, ApplicationContext> apps = new HashMap<>();
+	protected final Map<String, ApplicationContext> apps = new HashMap<>();
 
 	// --------------------------- Static methods ----------------------------
 
 	/**
-	 * Gets a application key
-	 * @param appID The application ID (not null)
-	 * @param version The application version
-	 * @return String The application key fixed
+	 * Gets a application key.
+	 * @param appID The application ID (not null).
+	 * @param version The application version.
+	 * @return The application key fixed.
 	 */
-	private static String getAppKey(String appID, String version) {
+	protected static String getAppKey(String appID, String version) {
 		String ver = fixAppVersion(version);
 		return appID.toUpperCase() + "|" + ver.toUpperCase();
 	}
 
 	/**
-	 * Fix the application version by default "1.0.0"
-	 * @param version The application version (optional, when it is null, the default value is "1.0.0")
-	 * @return String The version string fixed
+	 * Fix the application version by default "1.0.0".
+	 * @param version The application version (optional, when it is null, the default value is "1.0.0").
+	 * @return The version string fixed.
 	 */
 	public static String fixAppVersion(String version) {
 		return (version == null || version.trim().length() == 0) ? "1.0.0" : version.trim();
@@ -46,9 +47,35 @@ public class ActorManager {
 
 	// --------------------------- Public methods ----------------------------
 
+	@Override
+	public synchronized boolean config(ApplicationContext[] data, boolean reset) {
+		if (data == null) return false;
+		if (reset) {
+			this.apps.clear();
+			for (ApplicationContext app : data) {
+				this.apps.put(getAppKey(app.appID, app.version), app);
+			}
+		} else {
+			for (ApplicationContext app : data) {
+				String key = getAppKey(app.appID, app.version);
+				if (this.apps.containsKey(key)) continue;
+				this.apps.put(key, app);
+			}
+		}
+		return true;
+	}
+
 	/**
-	 * Gets all applications in this actor manager
-	 * @return ApplicationContext[] All applications in manager
+	 * Gets applications size (includes applications and different versions).
+	 * @return Applications size.
+	 */
+	public int getApplicationSize() {
+		return this.apps.size();
+	}
+
+	/**
+	 * Gets all applications in this actor manager.
+	 * @return All applications in manager.
 	 */
 	public ApplicationContext[] getAllApplications() {
 		return this.apps.values().toArray(new ApplicationContext[this.apps.size()]);
@@ -56,7 +83,7 @@ public class ActorManager {
 
 	/**
 	 * Add an application to this actor manager, if the application ID has been added, it will be replaced by current application object.
-	 * @param app Application context object (not null)
+	 * @param app Application context object (not null).
 	 */
 	public synchronized void addApplication(ApplicationContext app) {
 		if (app == null) return;
@@ -64,27 +91,10 @@ public class ActorManager {
 	}
 
 	/**
-	 * Add an application to this manager, if the application ID has been created in this manager, it will return the existing application object directly.
-	 * @param appID Application ID (not null or empty)
-	 * @param version Application version (optional, when it is null, the default value is "1.0.0")
-	 * @param enabled Whether to enable this application
-	 * @param doc Document description of this application
-	 * @return ApplicationContext The application context that be created in this application (returns null if the appID is invalid)
-	 */
-	public synchronized ApplicationContext addApplication(String appID, String version, boolean enabled, String doc) {
-		if (StringHelper.isEmpty(appID)) return null;
-		ApplicationContext app = this.apps.get(getAppKey(appID, version));
-		if (app != null) return app;
-		app = new ApplicationContext(this, appID, version, enabled, doc);
-		this.apps.put(getAppKey(app.appID, app.version), app);
-		return app;
-	}
-
-	/**
-	 * Gets an application object for the specified application ID (if appID does not exists in this actor manager, will returns null)
-	 * @param appID The application ID (not null or empty)
-	 * @param version The application version (optional, when it is null, the default value is "1.0.0")
-	 * @return ApplicationContext Application context object or null
+	 * Gets an application object for the specified application ID (if appID does not exists in this actor manager, will returns null).
+	 * @param appID The application ID (not null or empty).
+	 * @param version The application version (optional, when it is null, the default value is "1.0.0").
+	 * @return Application context object or null.
 	 */
 	public ApplicationContext getApplication(String appID, String version) {
 		if (StringHelper.isEmpty(appID)) return null;
@@ -92,10 +102,10 @@ public class ActorManager {
 	}
 
 	/**
-	 * Determine whether the specified application exists
-	 * @param appID The application ID (not null or empty)
-	 * @param version The application version (optional, when it is null, the default value is "1.0.0")
-	 * @return boolean If mid already exists, it returns true; otherwise, it returns false
+	 * Determine whether the specified application exists.
+	 * @param appID The application ID (not null or empty).
+	 * @param version The application version (optional, when it is null, the default value is "1.0.0").
+	 * @return If mid already exists, it returns true; otherwise, it returns false.
 	 */
 	public boolean hasApplication(String appID, String version) {
 		if (StringHelper.isEmpty(appID)) return false;
@@ -103,10 +113,10 @@ public class ActorManager {
 	}
 
 	/**
-	 * Remove an application object by the specified application ID
-	 * @param appID The application ID (not null or empty)
-	 * @param version The application version (optional, when it is null, the default value is "1.0.0")
-	 * @return ApplicationContext The application context object that be removed, will returns null if mismatch.
+	 * Remove an application object by the specified application ID.
+	 * @param appID The application ID (not null or empty).
+	 * @param version The application version (optional, when it is null, the default value is "1.0.0").
+	 * @return The application context object that be removed, will returns null if mismatch.
 	 */
 	public synchronized ApplicationContext removeApplication(String appID, String version) {
 		if (StringHelper.isEmpty(appID)) return null;
@@ -114,21 +124,21 @@ public class ActorManager {
 	}
 
 	/**
-	 * Clear all applications in current manager
+	 * Clear all applications in current manager.
 	 */
 	public synchronized void clearApplications() {
 		this.apps.clear();
 	}
 
 	/**
-	 * Gets a command object for the specified parameters (if command does not exists, will returns null)
-	 * @param appID The application ID (not null or empty)
-	 * @param appVersion The application version (optional, when it is null, the default value is "1.0.0")
-	 * @param moduleID The module ID in application (not null or empty)
-	 * @param actorID Actor ID in module (not null or empty, equivalent to page ID)
-	 * @param cmd The command ID in the actor (not null or empty)
-	 * @param enabledOnly If it is set to true, returns enabled command only; otherwise, the disabled command can be returned
-	 * @return CommandContext Command context object or null
+	 * Gets a command object for the specified parameters (if command does not exists, will returns null).
+	 * @param appID The application ID (not null or empty).
+	 * @param appVersion The application version (optional, when it is null, the default value is "1.0.0").
+	 * @param moduleID The module ID in application (not null or empty).
+	 * @param actorID Actor ID in module (not null or empty, equivalent to page ID).
+	 * @param cmd The command ID in the actor (not null or empty).
+	 * @param enabledOnly If it is set to true, returns enabled command only; otherwise, the disabled command can be returned.
+	 * @return Command context object or null.
 	 */
 	public CommandContext getCommand(String appID, String appVersion, String moduleID, String actorID, String cmd, boolean enabledOnly) {
 		// Gets an application object
