@@ -14,10 +14,17 @@ import java.lang.annotation.Target;
  * <pre>
  *    &#064;Actor(moduleID = "User-Center", actorID = "User", doc = "The actor for user module")
  *    public class UserActor {
- *        ...
+ *    
+ *        &#064;Command(cmd = "update-online-status", doc = "Update user online status")
+ *        public boolean updateOnlieStatus(String useID, int status) throws ActorError {
+ *            ...
+ *        }
+ *    
  *    }
  * </pre>
  * 
+ * <b>NOTICE: </b><br/>
+ * <b>This annotation needs to be used with the {@link Command } annotation.</b>
  * @author Ardon
  */
 @Documented

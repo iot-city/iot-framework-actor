@@ -1,7 +1,9 @@
 package org.iotcity.iot.framework.actor.beans;
 
 /**
- * Actor runtime error object.
+ * Actor runtime exception object used to respond a custom message.<br/>
+ * <b>1. You can throw an ActorError to custom logical failure message in the command method.</b><br/>
+ * <b>2. You can throw an ActorError to custom verification failure message in {@link ActorAuthorizer }.verifyPermission(...) method.</b><br/>
  * @author Ardon
  */
 public class ActorError extends Exception {

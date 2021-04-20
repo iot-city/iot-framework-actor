@@ -30,7 +30,7 @@ public class ActorResponseData implements ActorResponse {
 	 * @param status Response status (refer to ActorResponseStatus.XXXX).
 	 * @param msg Response message (usually used in response to result prompt, set to null if not required).
 	 * @param ref Reference notes (usually used for program debugging, set to null if not required).
-	 * @param data The business response data from method (optional).
+	 * @param data The business response data from method (optional, set to null if not required).
 	 */
 	public ActorResponseData(ActorResponseStatus status, String msg, String ref, Serializable data) {
 		this.status = status;

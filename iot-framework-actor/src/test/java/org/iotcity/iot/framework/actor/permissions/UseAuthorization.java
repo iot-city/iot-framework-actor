@@ -1,4 +1,4 @@
-package org.iotcity.iot.framework.actor.test1;
+package org.iotcity.iot.framework.actor.permissions;
 
 /**
  * @author Ardon

@@ -110,11 +110,13 @@ public final class AsyncCallbackLocker implements AsyncCallback {
 	public void setTimeout(long timeout) {
 		// Fix timeout value
 		this.timeout = timeout <= 0 ? 60000 : timeout;
+		// Verify status
+		if (hasCallbackResponse) return;
 		// Lock for notification
 		synchronized (lock) {
-			// Verify status
+			// Verify status again
 			if (!locked || hasCallbackResponse) return;
-			// Reset timeout value
+			// Set timeout value
 			timeoutChanged = true;
 			// Notify the lock
 			lock.notifyAll();
@@ -129,6 +131,8 @@ public final class AsyncCallbackLocker implements AsyncCallback {
 			// Make sure to respond only once
 			if (hasCallbackResponse) return;
 			hasCallbackResponse = true;
+			// Reset timeout value
+			timeoutChanged = false;
 			// Set response data
 			this.response = response;
 			// Notify the waiting lock to continue

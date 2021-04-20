@@ -58,6 +58,7 @@ public final class CommandContext {
 	 * @param async Whether as an asynchronous callback method (false by default).
 	 * @param enabled Whether to enable this command.
 	 * @param doc Document description of this command.
+	 * @throws IllegalArgumentException An error is thrown when one of the parameters "actor", "permission", "cmd" or "method" is null or empty.
 	 */
 	CommandContext(ActorContext actor, PermissionHandler permission, String cmd, Method method, long timeout, boolean async, boolean enabled, String doc) {
 		if (actor == null || permission == null || StringHelper.isEmpty(cmd) || method == null) {

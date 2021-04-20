@@ -116,7 +116,7 @@ public class ActorConfigure extends PropertiesConfigure<ApplicationContext[]> {
 	 * Annotation parser for actor annotation classes
 	 * @author Ardon
 	 */
-	public class ActorAnnotationParser implements AnnotationParser {
+	public final class ActorAnnotationParser implements AnnotationParser {
 
 		/**
 		 * Application context object
@@ -134,6 +134,7 @@ public class ActorConfigure extends PropertiesConfigure<ApplicationContext[]> {
 		/**
 		 * Constructor for actor annotation parser
 		 * @param app Application context object (not null)
+		 * @throws IllegalArgumentException An error is thrown when the parameter "app" is null.
 		 */
 		public ActorAnnotationParser(ApplicationContext app) {
 			if (app == null) throw new IllegalArgumentException("Parameter app can not be null!");
@@ -143,7 +144,7 @@ public class ActorConfigure extends PropertiesConfigure<ApplicationContext[]> {
 		}
 
 		@Override
-		public void parse(Class<?> clazz) {
+		public final void parse(Class<?> clazz) {
 			if (!clazz.isAnnotationPresent(Actor.class)) return;
 
 			// Get actor annotation

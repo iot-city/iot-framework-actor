@@ -53,7 +53,7 @@ import java.lang.annotation.Target;
  *    }
  * </pre>
  * 
- * <b>Note: </b><br/>
+ * <b>NOTICE: </b><br/>
  * 1. UseAuthorization.XXXX is an int permission identifier defined according to business logic, you need to defined it by yourself.<br/>
  * 2. The integer authorization number can be defined in the following way: UseAuthorization.XXXX = 2^n.<br/>
  * 3. The default value of permission annotation is 0, which can be set as a permission that only be accessed after login.<br/>

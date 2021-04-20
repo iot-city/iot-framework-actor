@@ -7,7 +7,7 @@ import org.iotcity.iot.framework.core.util.task.TaskHandler;
  * Asynchronous callback timer for asynchronous invoking from remote.
  * @author Ardon
  */
-public final class AsyncCallbackTimer implements AsyncCallback, Runnable {
+public final class AsyncCallbackTimer implements AsyncCallback {
 
 	// --------------------------- Private fields ----------------------------
 
@@ -48,6 +48,27 @@ public final class AsyncCallbackTimer implements AsyncCallback, Runnable {
 	 */
 	private boolean hasCallbackResponse = false;
 
+	/**
+	 * A task for response timeout event.
+	 */
+	private final Runnable timeoutTask = new Runnable() {
+
+		@Override
+		public void run() {
+			// Waiting for response timeout
+			if (hasCallbackResponse) return;
+			// Set status
+			synchronized (lock) {
+				if (hasCallbackResponse) return;
+				hasCallbackResponse = true;
+				hasTimeout = true;
+			}
+			// Callback timeout result
+			callback.callback(new ActorResponseData(ActorResponseStatus.TIMEOUT, null, null, null));
+		}
+
+	};
+
 	// --------------------------- Constructor ----------------------------
 
 	/**
@@ -56,6 +77,7 @@ public final class AsyncCallbackTimer implements AsyncCallback, Runnable {
 	 * @param taskHandler The task handler that creates a task for response result (can not be null).
 	 * @param callback Actor response callback object (can not be null).
 	 * @param timeout Waiting for response timeout milliseconds (60,000ms by default).
+	 * @throws IllegalArgumentException An error is thrown when the parameter "taskHandler" or "callback" is null.
 	 */
 	public AsyncCallbackTimer(String name, TaskHandler taskHandler, ActorResponseCallback callback, long timeout) {
 		if (taskHandler == null || callback == null) throw new IllegalArgumentException("Parameters taskHandler and callback can not be null!");
@@ -78,7 +100,7 @@ public final class AsyncCallbackTimer implements AsyncCallback, Runnable {
 			// Check progress status again in lock
 			if (timoutTaskID != 0 || hasCallbackResponse) return;
 			// Create a timer task
-			timoutTaskID = taskHandler.add(name, this, timeout);
+			timoutTaskID = taskHandler.add(name, timeoutTask, timeout);
 		}
 
 	}
@@ -89,20 +111,6 @@ public final class AsyncCallbackTimer implements AsyncCallback, Runnable {
 	 */
 	public ActorResponse getResponse() {
 		return this.response;
-	}
-
-	@Override
-	public void run() {
-		// Waiting for response timeout
-		if (hasCallbackResponse) return;
-		// Set status
-		synchronized (lock) {
-			if (hasCallbackResponse) return;
-			hasCallbackResponse = true;
-			hasTimeout = true;
-		}
-		// Callback timeout result
-		callback.callback(new ActorResponseData(ActorResponseStatus.TIMEOUT, null, null, null));
 	}
 
 	// --------------------------- Override methods ----------------------------
@@ -136,7 +144,7 @@ public final class AsyncCallbackTimer implements AsyncCallback, Runnable {
 			// Remove previous task
 			if (timoutTaskID != 0) taskHandler.remove(timoutTaskID);
 			// Rebuild the timeout task
-			timoutTaskID = taskHandler.add(name, this, this.timeout);
+			timoutTaskID = taskHandler.add(name, timeoutTask, this.timeout);
 		}
 
 	}

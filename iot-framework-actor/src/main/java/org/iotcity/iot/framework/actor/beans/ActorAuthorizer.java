@@ -1,9 +1,8 @@
 package org.iotcity.iot.framework.actor.beans;
 
-import org.iotcity.iot.framework.actor.context.CommandContext;
-
 /**
- * The permission validation object for actor invoker.
+ * The permission validation object for actor invoker.<br/>
+ * <b>Permission verification method will be called before calling the command method.</b>
  * @author Ardon
  */
 public interface ActorAuthorizer {
@@ -11,9 +10,10 @@ public interface ActorAuthorizer {
 	/**
 	 * Permission verification processing before calling the command method.
 	 * @param request Actor request data object (not null).
-	 * @param command Command object that need to verify permissions (not null).
+	 * @param info The command information in method runtime (not null).
 	 * @return Whether pass the permission verification.
+	 * @throws ActorError You can throw a custom verification failure message through the <b>{@link ActorError }</b> exception.
 	 */
-	boolean verifyPermission(ActorRequest request, CommandContext command);
+	boolean verifyPermission(ActorRequest request, CommandInfo info) throws ActorError;
 
 }

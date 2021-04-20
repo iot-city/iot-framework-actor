@@ -58,6 +58,7 @@ public final class ApplicationContext {
 	 * @param version Application version (optional, when it is null, the default value is "1.0.0").
 	 * @param enabled Whether to enable this application.
 	 * @param doc Document description of this application.
+	 * @throws IllegalArgumentException An error is thrown when the parameter "manager" or "appID" is null or empty.
 	 */
 	public ApplicationContext(ActorManager manager, TaskHandler taskHandler, String appID, String version, boolean enabled, String doc) {
 		if (manager == null || StringHelper.isEmpty(appID)) {

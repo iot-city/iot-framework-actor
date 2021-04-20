@@ -59,6 +59,7 @@ public final class ActorContext {
 	 * @param actorClass The actor class (not null).
 	 * @param enabled Whether to enable this actor.
 	 * @param doc Document description of this actor.
+	 * @throws IllegalArgumentException An error is thrown when one of the parameters "module", "permission", "actorID" or "actorClass" is null or empty.
 	 */
 	ActorContext(ModuleContext module, PermissionHandler permission, String actorID, Class<?> actorClass, boolean enabled, String doc) {
 		if (module == null || permission == null || StringHelper.isEmpty(actorID) || actorClass == null) {
