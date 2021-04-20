@@ -1,6 +1,9 @@
 package org.iotcity.iot.framework.actor.beans;
 
-import org.iotcity.iot.framework.core.util.helper.StringHelper;
+import java.io.Serializable;
+
+import org.iotcity.iot.framework.actor.FrameworkActor;
+import org.iotcity.iot.framework.actor.context.CommandContext;
 import org.iotcity.iot.framework.core.util.task.TaskHandler;
 
 /**
@@ -19,6 +22,10 @@ public final class AsyncCallbackTimer implements AsyncCallback {
 	 * The callback task name.
 	 */
 	private final String name;
+	/**
+	 * The command context.
+	 */
+	private final CommandContext command;
 	/**
 	 * The task handler that creates a task for response result.
 	 */
@@ -73,18 +80,19 @@ public final class AsyncCallbackTimer implements AsyncCallback {
 
 	/**
 	 * Constructor for asynchronous callback timer for asynchronous invoking from remote.
-	 * @param name The callback task name.
-	 * @param taskHandler The task handler that creates a task for response result (can not be null).
+	 * @param command The command context.
 	 * @param callback Actor response callback object (can not be null).
 	 * @param timeout Waiting for response timeout milliseconds (60,000ms by default).
-	 * @throws IllegalArgumentException An error is thrown when the parameter "taskHandler" or "callback" is null.
+	 * @throws IllegalArgumentException An error is thrown when the parameter "command" or "callback" is null.
 	 */
-	public AsyncCallbackTimer(String name, TaskHandler taskHandler, ActorResponseCallback callback, long timeout) {
-		if (taskHandler == null || callback == null) throw new IllegalArgumentException("Parameters taskHandler and callback can not be null!");
-		this.name = StringHelper.isEmpty(name) ? "AsyncCallback" : name;
-		this.taskHandler = taskHandler;
-		this.callback = callback;
+	public AsyncCallbackTimer(CommandContext command, ActorResponseCallback callback, long timeout) {
+		if (command == null || callback == null) throw new IllegalArgumentException("Parameter command or callback can not be null!");
+		this.command = command;
+		if (timeout <= 0) timeout = command.timeout;
 		this.timeout = timeout <= 0 ? 60000 : timeout;
+		this.taskHandler = command.actor.module.app.getTaskHandler();
+		this.callback = callback;
+		this.name = "Callback-" + command.actor.getClass().getSimpleName() + "." + command.method.getName() + "(...)";
 	}
 
 	// --------------------------- Public methods ----------------------------
@@ -110,7 +118,7 @@ public final class AsyncCallbackTimer implements AsyncCallback {
 	 * @return Response data.
 	 */
 	public ActorResponse getResponse() {
-		return this.response;
+		return response;
 	}
 
 	// --------------------------- Override methods ----------------------------
@@ -127,7 +135,7 @@ public final class AsyncCallbackTimer implements AsyncCallback {
 
 	@Override
 	public long getTimeout() {
-		return this.timeout;
+		return timeout;
 	}
 
 	@Override
@@ -135,14 +143,14 @@ public final class AsyncCallbackTimer implements AsyncCallback {
 		// Fix timeout value
 		this.timeout = timeout <= 0 ? 60000 : timeout;
 		// Check response status
-		if (hasCallbackResponse) return;
+		if (timoutTaskID == 0 || hasCallbackResponse) return;
 
 		// Lock for progress status
 		synchronized (lock) {
 			// Check response status again in lock
-			if (hasCallbackResponse) return;
+			if (timoutTaskID == 0 || hasCallbackResponse) return;
 			// Remove previous task
-			if (timoutTaskID != 0) taskHandler.remove(timoutTaskID);
+			taskHandler.remove(timoutTaskID);
 			// Rebuild the timeout task
 			timoutTaskID = taskHandler.add(name, timeoutTask, this.timeout);
 		}
@@ -150,9 +158,19 @@ public final class AsyncCallbackTimer implements AsyncCallback {
 	}
 
 	@Override
-	public void callback(ActorResponse response) {
+	public void callback(ActorResponse response) throws IllegalArgumentException {
 		// Skip invalid response
 		if (response == null) return;
+
+		// Get response data
+		Serializable data = response.getData();
+		// Check for async data type
+		if (data != null && !(command.asyncDataType.isInstance(data))) {
+			// Get message: The data type "{0}" of the asynchronous callback is inconsistent with the data type "{1}" defined by command "{2}", the declaration method is "{3}.{4}(...)".
+			String msg = FrameworkActor.getLocale().text("actor.invoke.async.type", data.getClass().getName(), command.asyncDataType.getName(), command.cmd, command.actor.actorClass.getName(), command.method.getName());
+			// Throw exception
+			throw new IllegalArgumentException(msg);
+		}
 
 		synchronized (lock) {
 			// Make sure to respond only once

@@ -7,7 +7,7 @@ package org.iotcity.iot.framework.actor.beans;
 public interface AsyncCallback {
 
 	/**
-	 * Whether waiting for response timed out.
+	 * Whether waiting for response has timed out.
 	 * @return Whether has time out.
 	 */
 	boolean isTimeout();
@@ -25,16 +25,17 @@ public interface AsyncCallback {
 	long getTimeout();
 
 	/**
-	 * Set a new timeout value to wait for response.<br/>
+	 * Set a new timeout value to wait for the response.<br/>
 	 * <b>This method has no effect when the callback response has been callback.</b>
 	 * @param timeout Timeout value for waiting for response in milliseconds (60,000ms by default).
 	 */
 	void setTimeout(long timeout);
 
 	/**
-	 * Callback response data.
-	 * @param response Response data (not null).
+	 * Callback response data (e.g. {@link ActorResponseData } ).
+	 * @param response Response data that implements from {@link ActorResponse } interface (not null).
+	 * @throws IllegalArgumentException An error is thrown when the data type of the asynchronous callback is inconsistent with the data type defined by command.
 	 */
-	void callback(ActorResponse response);
+	void callback(ActorResponse response) throws IllegalArgumentException;
 
 }

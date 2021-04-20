@@ -20,7 +20,6 @@ import org.iotcity.iot.framework.core.i18n.LocaleText;
 import org.iotcity.iot.framework.core.logging.Logger;
 import org.iotcity.iot.framework.core.util.helper.JavaHelper;
 import org.iotcity.iot.framework.core.util.helper.StringHelper;
-import org.iotcity.iot.framework.core.util.task.TaskHandler;
 
 /**
  * Execute the actor methods by this invoker.
@@ -160,10 +159,8 @@ public class ActorInvoker {
 		AsyncCallbackLocker asyncCallback = null;
 		// Whether the method run in asynchronous mode
 		if (command.async) {
-			// Fix timeout
-			if (timeout <= 0) timeout = command.timeout;
 			// Create callback object
-			asyncCallback = new AsyncCallbackLocker(timeout);
+			asyncCallback = new AsyncCallbackLocker(command, timeout);
 			// Set callback to thread local
 			ActorThreadLocal.setAsyncCallback(asyncCallback);
 		}
@@ -286,14 +283,8 @@ public class ActorInvoker {
 		AsyncCallbackTimer asyncCallback = null;
 		// Whether the method run in asynchronous mode
 		if (command.async) {
-			// Fix timeout
-			if (timeout <= 0) timeout = command.timeout;
-			// Get task name
-			String taskName = "Callback-" + actor.getClass().getSimpleName() + "." + method.getName() + "(...)";
-			// Get task handler
-			TaskHandler taskHandler = command.actor.module.app.getTaskHandler();
 			// Create callback object
-			asyncCallback = new AsyncCallbackTimer(taskName, taskHandler, callback, timeout);
+			asyncCallback = new AsyncCallbackTimer(command, callback, timeout);
 			// Set callback to thread local
 			ActorThreadLocal.setAsyncCallback(asyncCallback);
 		}
@@ -361,17 +352,13 @@ public class ActorInvoker {
 			String logMsg = locale.text("actor.invoke.logic.error", command.cmd, actor.getClass().getName(), method.getName(), e.getMessage());
 			// Check for logical error
 			if (e instanceof ActorError) {
-
 				// Logs info message
 				logger.info(logMsg);
 				// Return a logical message
 				return new ActorResponseData(ActorResponseStatus.LOGIC_FAILED, e.getMessage(), null, null);
-
 			} else {
-
 				// Return an exception response
 				return getExceptionResponse(ActorResponseStatus.EXCEPTION, null, langs, logMsg, e);
-
 			}
 
 		}

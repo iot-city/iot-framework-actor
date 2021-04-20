@@ -1,5 +1,10 @@
 package org.iotcity.iot.framework.actor.beans;
 
+import java.io.Serializable;
+
+import org.iotcity.iot.framework.actor.FrameworkActor;
+import org.iotcity.iot.framework.actor.context.CommandContext;
+
 /**
  * Asynchronous callback locker for synchronous invoking from remote.
  * @author Ardon
@@ -8,6 +13,10 @@ public final class AsyncCallbackLocker implements AsyncCallback {
 
 	// --------------------------- Private fields ----------------------------
 
+	/**
+	 * The command context.
+	 */
+	private final CommandContext command;
 	/**
 	 * Response lock object.
 	 */
@@ -41,10 +50,14 @@ public final class AsyncCallbackLocker implements AsyncCallback {
 
 	/**
 	 * Constructor for asynchronous callback lock handler.
+	 * @param command The command context (not null).
 	 * @param timeout Response timeout milliseconds (60,000ms by default).
 	 */
-	public AsyncCallbackLocker(long timeout) {
+	public AsyncCallbackLocker(CommandContext command, long timeout) {
+		if (command == null) throw new IllegalArgumentException("Parameter command can not be null!");
+		if (timeout <= 0) timeout = command.timeout;
 		this.timeout = timeout <= 0 ? 60000 : timeout;
+		this.command = command;
 	}
 
 	// --------------------------- Public methods ----------------------------
@@ -111,7 +124,7 @@ public final class AsyncCallbackLocker implements AsyncCallback {
 		// Fix timeout value
 		this.timeout = timeout <= 0 ? 60000 : timeout;
 		// Verify status
-		if (hasCallbackResponse) return;
+		if (!locked || hasCallbackResponse) return;
 		// Lock for notification
 		synchronized (lock) {
 			// Verify status again
@@ -124,9 +137,20 @@ public final class AsyncCallbackLocker implements AsyncCallback {
 	}
 
 	@Override
-	public void callback(ActorResponse response) {
+	public void callback(ActorResponse response) throws IllegalArgumentException {
 		// Skip invalid response
 		if (response == null) return;
+
+		// Get response data
+		Serializable data = response.getData();
+		// Check for async data type
+		if (data != null && !(command.asyncDataType.isInstance(data))) {
+			// Get message: The data type "{0}" of the asynchronous callback is inconsistent with the data type "{1}" defined by command "{2}", the declaration method is "{3}.{4}(...)".
+			String msg = FrameworkActor.getLocale().text("actor.invoke.async.type", data.getClass().getName(), command.asyncDataType.getName(), command.cmd, command.actor.actorClass.getName(), command.method.getName());
+			// Throw exception
+			throw new IllegalArgumentException(msg);
+		}
+
 		synchronized (lock) {
 			// Make sure to respond only once
 			if (hasCallbackResponse) return;
@@ -139,6 +163,7 @@ public final class AsyncCallbackLocker implements AsyncCallback {
 			// Will set the locked value to false in getLock() method after release
 			if (locked) lock.notifyAll();
 		}
+
 	}
 
 }

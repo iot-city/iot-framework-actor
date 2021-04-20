@@ -9,7 +9,7 @@ package org.iotcity.iot.framework.actor.beans;
 public class ActorError extends Exception {
 
 	/**
-	 * Version ID for serialized form
+	 * Version ID for serialized form.
 	 */
 	private static final long serialVersionUID = 1L;
 

@@ -1,7 +1,9 @@
 package org.iotcity.iot.framework.actor.context;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 
+import org.iotcity.iot.framework.actor.annotation.NonAsync;
 import org.iotcity.iot.framework.core.util.helper.StringHelper;
 
 /**
@@ -37,6 +39,10 @@ public final class CommandContext {
 	 */
 	public final boolean async;
 	/**
+	 * (Readonly) The data type of the asynchronous callback result (it will be null value in synchronous mode).
+	 */
+	public final Class<? extends Serializable> asyncDataType;
+	/**
 	 * Whether to enable this command.<br/>
 	 * You can set it <b>false</b> value to disable this command in runtime.
 	 */
@@ -55,12 +61,12 @@ public final class CommandContext {
 	 * @param cmd Command ID (not null or empty).
 	 * @param method The method of this command is already bound (not null).
 	 * @param timeout Response timeout milliseconds (60,000ms by default).
-	 * @param async Whether as an asynchronous callback method (false by default).
+	 * @param async The data type of the asynchronous callback result (set it to null or NonAsync.class if in synchronous mode).
 	 * @param enabled Whether to enable this command.
 	 * @param doc Document description of this command.
 	 * @throws IllegalArgumentException An error is thrown when one of the parameters "actor", "permission", "cmd" or "method" is null or empty.
 	 */
-	CommandContext(ActorContext actor, PermissionHandler permission, String cmd, Method method, long timeout, boolean async, boolean enabled, String doc) {
+	CommandContext(ActorContext actor, PermissionHandler permission, String cmd, Method method, long timeout, Class<? extends Serializable> async, boolean enabled, String doc) {
 		if (actor == null || permission == null || StringHelper.isEmpty(cmd) || method == null) {
 			throw new IllegalArgumentException("Parameter actor, permission, cmd and method can not be null or empty!");
 		}
@@ -69,7 +75,8 @@ public final class CommandContext {
 		this.cmd = cmd;
 		this.method = method;
 		this.timeout = timeout <= 0 ? 60000 : timeout;
-		this.async = async;
+		this.async = async != null && !async.equals(NonAsync.class);
+		this.asyncDataType = this.async ? async : null;
 		this.enabled = enabled;
 		this.doc = doc;
 	}

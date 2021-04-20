@@ -1,5 +1,6 @@
 package org.iotcity.iot.framework.actor.context;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -97,12 +98,12 @@ public final class ActorContext {
 	 * @param cmd Command ID (not null or empty).
 	 * @param method The method of this command is already bound (not null).
 	 * @param timeout Response timeout milliseconds (60,000ms by default).
-	 * @param async Whether as an asynchronous callback method (false by default).
+	 * @param async The data type of the asynchronous callback result (set it to null or NonAsync.class if in synchronous mode).
 	 * @param enabled Whether to enable this command.
 	 * @param doc Document description of this command.
 	 * @return The command context that be created in this actor (returns null if the cmd is invalid).
 	 */
-	public synchronized CommandContext addCommand(PermissionHandler permission, String cmd, Method method, long timeout, boolean async, boolean enabled, String doc) {
+	public synchronized CommandContext addCommand(PermissionHandler permission, String cmd, Method method, long timeout, Class<? extends Serializable> async, boolean enabled, String doc) {
 		if (StringHelper.isEmpty(cmd)) return null;
 		CommandContext command = this.commands.get(cmd.toUpperCase());
 		if (command != null && command.method == method) return command;

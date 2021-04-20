@@ -49,11 +49,14 @@ public @interface Command {
 	long timeout() default 60000;
 
 	/**
-	 * Whether as an asynchronous callback method (optional, false by default).</br>
-	 * 1. This property needs to cooperate with the implementation of {@link AsyncCallback } interface.</br>
-	 * 2. You can get the asynchronous callback object through {@link ActorThreadLocal }.getAsyncCallback() in your business logic.
+	 * Specifies the data type of the asynchronous callback result, and this method will be executed in asynchronous mode, otherwise, the method will run in synchronous mode ({@link NonAsync }.class by default).<br/>
+	 * <b>NOTICE:</b><br/>
+	 * 1. Set to {@link Void }.class if without asynchronous callback data, the method will still run in asynchronous mode.<br/>
+	 * 2. This property needs to cooperate with the implementation of {@link AsyncCallback } interface.<br/>
+	 * 3. You can get the {@link AsyncCallback } object through {@link ActorThreadLocal }.getAsyncCallback() in your business logic.<br/>
+	 * 4. In the spring framework, the {@link AsyncCallback } object can be obtained by using @Autowired annotation.<br/>
 	 */
-	boolean async() default false;
+	Class<? extends Serializable> async() default NonAsync.class;
 
 	/**
 	 * Whether to enable this command (optional, true by default).
