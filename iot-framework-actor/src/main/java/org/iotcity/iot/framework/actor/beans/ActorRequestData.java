@@ -1,7 +1,9 @@
 package org.iotcity.iot.framework.actor.beans;
 
 import java.io.Serializable;
+import java.util.Date;
 
+import org.iotcity.iot.framework.core.util.helper.ConvertHelper;
 import org.iotcity.iot.framework.core.util.helper.StringHelper;
 
 /**
@@ -101,22 +103,41 @@ public class ActorRequestData implements ActorRequest {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("{appID=");
+		sb.append("{appID=\"");
 		sb.append(appID);
-		sb.append(", appVersion=");
+		sb.append("\", appVersion=\"");
 		sb.append(appVersion);
-		sb.append(", moduleID=");
+		sb.append("\", moduleID=\"");
 		sb.append(moduleID);
-		sb.append(", actorID=");
+		sb.append("\", actorID=\"");
 		sb.append(actorID);
-		sb.append(", cmd=");
+		sb.append("\", cmd=\"");
 		sb.append(cmd);
-		sb.append(", params=");
+		sb.append("\", params=");
 		if (params == null) {
 			sb.append("null");
 		} else {
 			sb.append("[");
-			sb.append(params.length);
+			for (int i = 0, c = params.length; i < c; i++) {
+				Serializable param = params[i];
+				if (i > 0) sb.append(", ");
+				if (param == null) {
+					sb.append("null");
+				} else {
+					Class<?> type = param.getClass();
+					if (type.isPrimitive()) {
+						sb.append(param);
+					} else if (type == String.class) {
+						sb.append("\"").append(param).append("\"");
+					} else if (type == Boolean.class || type == Integer.class || type == Long.class || type == Float.class || type == Double.class || type == Short.class || type == Byte.class || type == Character.class) {
+						sb.append(param);
+					} else if (type == Date.class) {
+						sb.append("\"").append(ConvertHelper.formatDate((Date) param)).append("\"");
+					} else {
+						sb.append("Object(").append(type.getSimpleName()).append(")");
+					}
+				}
+			}
 			sb.append("]");
 		}
 		sb.append("}");

@@ -1,6 +1,9 @@
 package org.iotcity.iot.framework.actor.beans;
 
 import java.io.Serializable;
+import java.util.Date;
+
+import org.iotcity.iot.framework.core.util.helper.ConvertHelper;
 
 /**
  * Actor response data object.
@@ -65,9 +68,34 @@ public class ActorResponseData implements ActorResponse {
 		sb.append("{status=");
 		sb.append(status);
 		sb.append(", msg=");
-		sb.append(msg);
+		if (msg == null) {
+			sb.append("null");
+		} else {
+			sb.append("\"").append(msg).append("\"");
+		}
 		sb.append(", ref=");
-		sb.append(ref);
+		if (ref == null) {
+			sb.append("null");
+		} else {
+			sb.append("\"").append(ref).append("\"");
+		}
+		sb.append(", data=");
+		if (data == null) {
+			sb.append("null");
+		} else {
+			Class<?> type = data.getClass();
+			if (type.isPrimitive()) {
+				sb.append(data);
+			} else if (type == String.class) {
+				sb.append("\"").append(data).append("\"");
+			} else if (type == Boolean.class || type == Integer.class || type == Long.class || type == Float.class || type == Double.class || type == Short.class || type == Byte.class || type == Character.class) {
+				sb.append(data);
+			} else if (type == Date.class) {
+				sb.append("\"").append(ConvertHelper.formatDate((Date) data)).append("\"");
+			} else {
+				sb.append("Object(").append(type.getSimpleName()).append(")");
+			}
+		}
 		sb.append("}");
 		return sb.toString();
 	}

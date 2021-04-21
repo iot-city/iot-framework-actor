@@ -7,9 +7,11 @@ import org.iotcity.iot.framework.core.logging.Logger;
 
 /**
  * @author Ardon
+ * @date 2021-04-22
  */
+// Test for duplicate actors in one module
 @Actor(moduleID = "DISABLED", actorID = "ActorDisabled", enabled = false, doc = "Disabled actor test")
-public class ActorDisabled {
+public class ActorDisabledDuplicate {
 
 	private final Logger logger = FrameworkActor.getLogger();
 

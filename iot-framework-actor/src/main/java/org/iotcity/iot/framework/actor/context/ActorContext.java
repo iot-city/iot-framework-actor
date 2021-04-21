@@ -21,9 +21,9 @@ public final class ActorContext {
 	 */
 	public final ModuleContext module;
 	/**
-	 * (Readonly) The permission handler of this actor (not null).
+	 * (Readonly) The permission context of this actor (not null).
 	 */
-	public final PermissionHandler permission;
+	public final PermissionContext permission;
 	/**
 	 * (Readonly) Actor ID in module (not null or empty, equivalent to page ID).
 	 */
@@ -55,14 +55,14 @@ public final class ActorContext {
 	/**
 	 * Constructor for actor context.
 	 * @param module The module to which this actor belongs (not null).
-	 * @param permission The permission handler of this actor (not null).
+	 * @param permission The permission context of this actor (not null).
 	 * @param actorID Actor ID in module (not null or empty, equivalent to page ID).
 	 * @param actorClass The actor class (not null).
 	 * @param enabled Whether to enable this actor.
 	 * @param doc Document description of this actor.
 	 * @throws IllegalArgumentException An error is thrown when one of the parameters "module", "permission", "actorID" or "actorClass" is null or empty.
 	 */
-	ActorContext(ModuleContext module, PermissionHandler permission, String actorID, Class<?> actorClass, boolean enabled, String doc) {
+	ActorContext(ModuleContext module, PermissionContext permission, String actorID, Class<?> actorClass, boolean enabled, String doc) {
 		if (module == null || permission == null || StringHelper.isEmpty(actorID) || actorClass == null) {
 			throw new IllegalArgumentException("Parameter module, permission, actorID and actorClass can not be null or empty!");
 		}
@@ -94,7 +94,7 @@ public final class ActorContext {
 
 	/**
 	 * Add a command to this actor, if the command.cmd has been created in this actor, it will return the existing command object directly.
-	 * @param permission The permission handler of this command (not null).
+	 * @param permission The permission context of this command (not null).
 	 * @param cmd Command ID (not null or empty).
 	 * @param method The method of this command is already bound (not null).
 	 * @param timeout Response timeout milliseconds (60,000ms by default).
@@ -103,7 +103,7 @@ public final class ActorContext {
 	 * @param doc Document description of this command.
 	 * @return The command context that be created in this actor (returns null if the cmd is invalid).
 	 */
-	public synchronized CommandContext addCommand(PermissionHandler permission, String cmd, Method method, long timeout, Class<? extends Serializable> async, boolean enabled, String doc) {
+	public synchronized CommandContext addCommand(PermissionContext permission, String cmd, Method method, long timeout, Class<? extends Serializable> async, boolean enabled, String doc) {
 		if (StringHelper.isEmpty(cmd)) return null;
 		CommandContext command = this.commands.get(cmd.toUpperCase());
 		if (command != null && command.method == method) return command;
@@ -153,6 +153,25 @@ public final class ActorContext {
 	 */
 	public synchronized void clearCommands() {
 		this.commands.clear();
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("{appID=\"");
+		sb.append(module.app.appID);
+		sb.append("\", appVersion=\"");
+		sb.append(module.app.version);
+		sb.append("\", moduleID=\"");
+		sb.append(module.moduleID);
+		sb.append("\", actorID=\"");
+		sb.append(actorID);
+		sb.append("\", class=\"");
+		sb.append(actorClass.getName());
+		sb.append("\", enabled=");
+		sb.append(enabled);
+		sb.append("}");
+		return sb.toString();
 	}
 
 }

@@ -19,9 +19,9 @@ public final class CommandContext {
 	 */
 	public final ActorContext actor;
 	/**
-	 * (Readonly) The permission handler of this command (not null).
+	 * (Readonly) The permission context of this command (not null).
 	 */
-	public final PermissionHandler permission;
+	public final PermissionContext permission;
 	/**
 	 * (Readonly) Command ID (not null or empty).
 	 */
@@ -57,7 +57,7 @@ public final class CommandContext {
 	/**
 	 * Constructor for command context.
 	 * @param actor The actor to which this command belongs (not null).
-	 * @param permission The permission handler of this command (not null).
+	 * @param permission The permission context of this command (not null).
 	 * @param cmd Command ID (not null or empty).
 	 * @param method The method of this command is already bound (not null).
 	 * @param timeout Response timeout milliseconds (60,000ms by default).
@@ -66,7 +66,7 @@ public final class CommandContext {
 	 * @param doc Document description of this command.
 	 * @throws IllegalArgumentException An error is thrown when one of the parameters "actor", "permission", "cmd" or "method" is null or empty.
 	 */
-	CommandContext(ActorContext actor, PermissionHandler permission, String cmd, Method method, long timeout, Class<? extends Serializable> async, boolean enabled, String doc) {
+	CommandContext(ActorContext actor, PermissionContext permission, String cmd, Method method, long timeout, Class<? extends Serializable> async, boolean enabled, String doc) {
 		if (actor == null || permission == null || StringHelper.isEmpty(cmd) || method == null) {
 			throw new IllegalArgumentException("Parameter actor, permission, cmd and method can not be null or empty!");
 		}
@@ -79,6 +79,37 @@ public final class CommandContext {
 		this.asyncDataType = this.async ? async : null;
 		this.enabled = enabled;
 		this.doc = doc;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("{appID=\"");
+		sb.append(actor.module.app.appID);
+		sb.append("\", appVersion=\"");
+		sb.append(actor.module.app.version);
+		sb.append("\", moduleID=\"");
+		sb.append(actor.module.moduleID);
+		sb.append("\", actorID=\"");
+		sb.append(actor.actorID);
+		sb.append("\", cmd=\"");
+		sb.append(cmd);
+		sb.append("\", method=\"");
+		sb.append(actor.actorClass.getSimpleName()).append(".").append(method.getName()).append("(...)");
+		sb.append("\", async=");
+		sb.append(async);
+		sb.append(", asyncDataType=");
+		if (asyncDataType == null) {
+			sb.append("null");
+		} else {
+			sb.append("\"").append(asyncDataType.getSimpleName()).append("\"");
+		}
+		sb.append(", timeout=");
+		sb.append(timeout);
+		sb.append(", enabled=");
+		sb.append(enabled);
+		sb.append("}");
+		return sb.toString();
 	}
 
 }

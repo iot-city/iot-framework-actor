@@ -1,7 +1,9 @@
 package org.iotcity.iot.framework.actor;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Date;
 
 import org.iotcity.iot.framework.actor.beans.ActorAuthorizer;
 import org.iotcity.iot.framework.actor.beans.ActorError;
@@ -18,7 +20,7 @@ import org.iotcity.iot.framework.actor.beans.CommandInfoData;
 import org.iotcity.iot.framework.actor.context.CommandContext;
 import org.iotcity.iot.framework.core.i18n.LocaleText;
 import org.iotcity.iot.framework.core.logging.Logger;
-import org.iotcity.iot.framework.core.util.helper.JavaHelper;
+import org.iotcity.iot.framework.core.util.helper.ConvertHelper;
 import org.iotcity.iot.framework.core.util.helper.StringHelper;
 
 /**
@@ -27,7 +29,7 @@ import org.iotcity.iot.framework.core.util.helper.StringHelper;
  */
 public class ActorInvoker {
 
-	// --------------------------- Protected fields ----------------------------
+	// ---------------------------------- Protected fields ----------------------------------
 
 	/**
 	 * The actor manager (not null, use to provide information for all actors).
@@ -50,12 +52,12 @@ public class ActorInvoker {
 	 */
 	protected final LocaleText locale;
 
-	// --------------------------- Constructor ----------------------------
+	// ---------------------------------- Constructor ----------------------------------
 
 	/**
 	 * Constructor for actor invoker.
 	 * @param manager The actor manager (not null, use to provide information for all actors).
-	 * @param actors Create an actor for business logic factory (optional, it can be set to null when using <b>new</b> to create an instance).
+	 * @param actors Create an actor for business logic factory (optional, it can be set to null when using Class.newInstance() to create an instance).
 	 * @param authorizer The actor authorizer for permission verification (optional, set to null when permission verification is not required).
 	 * @throws IllegalArgumentException An error is thrown when the parameter "manager" is null.
 	 */
@@ -68,7 +70,7 @@ public class ActorInvoker {
 		this.locale = FrameworkActor.getLocale();
 	}
 
-	// --------------------------- Public methods ----------------------------
+	// ---------------------------------- Public synchronous invoke method ----------------------------------
 
 	/**
 	 * Synchronous call mode to return the response.
@@ -100,23 +102,31 @@ public class ActorInvoker {
 
 			// Permission verification
 			if (authorizer != null && !authorizer.verifyPermission(request, info)) {
+
+				// Get the parameter values
+				String value = getParamValues(command, request.getParams());
 				// Get unauthorized message
-				String msg = FrameworkActor.getLocale(langs).text("actor.invoke.permission.info");
+				String userMsg = FrameworkActor.getLocale(langs).text("actor.invoke.permission.info");
+				// Get logger message
+				String logMsg = locale.text("actor.invoke.permission.error", command.actor.module.app.appID, command.actor.module.moduleID, command.actor.actorID, command.cmd, value, userMsg);
 				// Logs unauthorized message
-				logger.info(locale.text("actor.invoke.permission.error", command.actor.module.app.appID, command.actor.module.moduleID, command.actor.actorID, command.cmd, request.toString(), msg));
+				logger.warn(logMsg);
 				// Callback a UNAUTHORIZED message
-				return new ActorResponseData(ActorResponseStatus.UNAUTHORIZED, msg, null, null);
+				return new ActorResponseData(ActorResponseStatus.UNAUTHORIZED, userMsg, null, null);
+
 			}
 
 		} catch (Exception e) {
 
-			// Get error message: Permission verification failed, current application: "{0}", module: "{1}", actor: "{2}", command: "{3}", request data: {4}, error message: {5}
-			String logMsg = locale.text("actor.invoke.permission.error", command.actor.module.app.appID, command.actor.module.moduleID, command.actor.actorID, command.cmd, request.toString(), e.getMessage());
+			// Get the parameter values
+			String value = getParamValues(command, request.getParams());
+			// Get error message: Permission verification failed, current application: "{0}", module: "{1}", actor: "{2}", command: "{3}", method data: {4}, error message: {5}
+			String logMsg = locale.text("actor.invoke.permission.error", command.actor.module.app.appID, command.actor.module.moduleID, command.actor.actorID, command.cmd, value, e.getMessage());
 			// Check for logical error
 			if (e instanceof ActorError) {
-				// Logs info message
-				logger.info(logMsg);
-				// Return a UNAUTHORIZED message
+				// Logs warn message
+				logger.warn(logMsg);
+				// Return a unauthorized response
 				return new ActorResponseData(ActorResponseStatus.UNAUTHORIZED, e.getMessage(), null, null);
 			} else {
 				// Return an exception response
@@ -135,19 +145,39 @@ public class ActorInvoker {
 
 		// Verify parameters
 		if (paramsCount > 0 && (params == null || params.length != paramsCount)) {
-			String msg = FrameworkActor.getLocale(langs).text("actor.invoke.params.count");
-			return new ActorResponseData(ActorResponseStatus.BAD_PARAMETERS, msg, null, null);
+
+			// Get user message
+			String userMsg = FrameworkActor.getLocale(langs).text("actor.invoke.params.count");
+			// Get illegal message
+			String paramMsg = getErrorParamTypesInfo(method, params);
+			// Get error message: Command \"{0}\" method \"{1}.{2}(...)\" logic error: {3}".
+			String logMsg = locale.text("actor.invoke.logic.error", command.cmd, actorClass.getSimpleName(), method.getName(), paramMsg);
+			// Logs error message
+			logger.warn(logMsg);
+			// Callback response
+			return new ActorResponseData(ActorResponseStatus.BAD_PARAMETERS, userMsg, logMsg, null);
+
 		}
 
 		// Create an actor object
 		Object actor;
 		try {
-			actor = actors == null ? actorClass.newInstance() : actors.getInstance(actorClass);
+			actor = actors == null ? actorClass.newInstance() : actors.getInstance(request, info);
 		} catch (Exception e) {
+
 			// Get message
-			String logMsg = locale.text("actor.invoke.create.error", actorClass.getName());
-			// Return an exception response
-			return getExceptionResponse(ActorResponseStatus.EXCEPTION, null, langs, logMsg, e);
+			String logMsg = locale.text("actor.invoke.create.error", actorClass.getName(), e.getMessage());
+			// Check for logical error
+			if (e instanceof ActorError) {
+				// Logs warn message
+				logger.warn(logMsg);
+				// Return response data
+				return new ActorResponseData(ActorResponseStatus.REJECT, e.getMessage(), null, null);
+			} else {
+				// Return an exception response
+				return getExceptionResponse(ActorResponseStatus.EXCEPTION, null, langs, logMsg, e);
+			}
+
 		}
 
 		// Whether actor is valid
@@ -160,7 +190,7 @@ public class ActorInvoker {
 		// Whether the method run in asynchronous mode
 		if (command.async) {
 			// Create callback object
-			asyncCallback = new AsyncCallbackLocker(command, timeout);
+			asyncCallback = new AsyncCallbackLocker(request, command, timeout);
 			// Set callback to thread local
 			ActorThreadLocal.setAsyncCallback(asyncCallback);
 		}
@@ -182,6 +212,8 @@ public class ActorInvoker {
 		}
 
 	}
+
+	// ---------------------------------- Public asynchronous invoke method ----------------------------------
 
 	/**
 	 * Asynchronous call mode to return the response.
@@ -216,19 +248,25 @@ public class ActorInvoker {
 			// Permission verification
 			if (authorizer != null && !authorizer.verifyPermission(request, info)) {
 
+				// Get the parameter values
+				String value = getParamValues(command, request.getParams());
 				// Get unauthorized message
-				String msg = FrameworkActor.getLocale(langs).text("actor.invoke.permission.info");
+				String userMsg = FrameworkActor.getLocale(langs).text("actor.invoke.permission.info");
+				// Get logger message
+				String logMsg = locale.text("actor.invoke.permission.error", command.actor.module.app.appID, command.actor.module.moduleID, command.actor.actorID, command.cmd, value, userMsg);
 				// Logs unauthorized message
-				logger.info(locale.text("actor.invoke.permission.error", command.actor.module.app.appID, command.actor.module.moduleID, command.actor.actorID, command.cmd, request.toString(), msg));
+				logger.warn(logMsg);
 				// Callback a UNAUTHORIZED message
-				callback.callback(new ActorResponseData(ActorResponseStatus.UNAUTHORIZED, msg, null, null));
+				callback.callback(new ActorResponseData(ActorResponseStatus.UNAUTHORIZED, userMsg, null, null));
 
 				return;
 			}
 		} catch (Exception e) {
 
-			// Get error message: Permission verification failed, current application: "{0}", module: "{1}", actor: "{2}", command: "{3}", request data: {4}, error message: {5}
-			String logMsg = locale.text("actor.invoke.permission.error", command.actor.module.app.appID, command.actor.module.moduleID, command.actor.actorID, command.cmd, request.toString(), e.getMessage());
+			// Get the parameter values
+			String value = getParamValues(command, request.getParams());
+			// Get error message: Permission verification failed, current application: "{0}", module: "{1}", actor: "{2}", command: "{3}", method data: {4}, error message: {5}
+			String logMsg = locale.text("actor.invoke.permission.error", command.actor.module.app.appID, command.actor.module.moduleID, command.actor.actorID, command.cmd, value, e.getMessage());
 			// Check for logical error
 			if (e instanceof ActorError) {
 				// Logs info message
@@ -254,20 +292,40 @@ public class ActorInvoker {
 
 		// Verify parameters
 		if (paramsCount > 0 && (params == null || params.length != paramsCount)) {
-			String msg = FrameworkActor.getLocale(langs).text("actor.invoke.params.count");
-			callback.callback(new ActorResponseData(ActorResponseStatus.BAD_PARAMETERS, msg, null, null));
+
+			// Get user message
+			String userMsg = FrameworkActor.getLocale(langs).text("actor.invoke.params.count");
+			// Get illegal message
+			String paramMsg = getErrorParamTypesInfo(method, params);
+			// Get error message: Command \"{0}\" method \"{1}.{2}(...)\" logic error: {3}".
+			String logMsg = locale.text("actor.invoke.logic.error", command.cmd, actorClass.getSimpleName(), method.getName(), paramMsg);
+			// Logs error message
+			logger.warn(logMsg);
+			// Callback response
+			callback.callback(new ActorResponseData(ActorResponseStatus.BAD_PARAMETERS, userMsg, logMsg, null));
+
 			return;
 		}
 
 		// Create an actor object
 		Object actor;
 		try {
-			actor = actors == null ? actorClass.newInstance() : actors.getInstance(actorClass);
+			actor = actors == null ? actorClass.newInstance() : actors.getInstance(request, info);
 		} catch (Exception e) {
+
 			// Get message
-			String logMsg = locale.text("actor.invoke.create.error", actorClass.getName());
-			// Return exception
-			callback.callback(getExceptionResponse(ActorResponseStatus.EXCEPTION, null, langs, logMsg, e));
+			String logMsg = locale.text("actor.invoke.create.error", actorClass.getName(), e.getMessage());
+			// Check for logical error
+			if (e instanceof ActorError) {
+				// Logs warn message
+				logger.warn(logMsg);
+				// Return response data
+				callback.callback(new ActorResponseData(ActorResponseStatus.REJECT, e.getMessage(), null, null));
+			} else {
+				// Return an exception response
+				callback.callback(getExceptionResponse(ActorResponseStatus.EXCEPTION, null, langs, logMsg, e));
+			}
+
 			return;
 		}
 
@@ -284,7 +342,7 @@ public class ActorInvoker {
 		// Whether the method run in asynchronous mode
 		if (command.async) {
 			// Create callback object
-			asyncCallback = new AsyncCallbackTimer(command, callback, timeout);
+			asyncCallback = new AsyncCallbackTimer(request, command, callback, timeout);
 			// Set callback to thread local
 			ActorThreadLocal.setAsyncCallback(asyncCallback);
 		}
@@ -310,7 +368,7 @@ public class ActorInvoker {
 
 	}
 
-	// --------------------------- Private methods ----------------------------
+	// --------------------------------------- Private methods ---------------------------------------
 
 	/**
 	 * Invoke the command method (returns not null).
@@ -341,27 +399,110 @@ public class ActorInvoker {
 
 			// Get user message
 			String userMsg = FrameworkActor.getLocale(langs).text("actor.invoke.params.error");
+			// Get illegal message
+			String paramMsg = getErrorParamTypesInfo(method, params);
 			// Get error message: Command \"{0}\" method \"{1}.{2}(...)\" logic error: {3}".
-			String logMsg = locale.text("actor.invoke.logic.error", command.cmd, actor.getClass().getName(), method.getName(), e.getMessage());
-			// Return an exception response
-			return getExceptionResponse(ActorResponseStatus.BAD_PARAMETERS, userMsg, langs, logMsg, e);
+			String logMsg = locale.text("actor.invoke.logic.error", command.cmd, actor.getClass().getSimpleName(), method.getName(), paramMsg);
+			// Logs error message
+			logger.warn(logMsg);
+			return new ActorResponseData(ActorResponseStatus.BAD_PARAMETERS, userMsg, logMsg, null);
+
+		} catch (InvocationTargetException ex) {
+
+			// Get target exception
+			Throwable e = ex.getTargetException();
+			if (e == null) e = ex;
+			// Get error message: Command \"{0}\" method \"{1}.{2}(...)\" logic error: {3}".
+			String logMsg = locale.text("actor.invoke.logic.error", command.cmd, actor.getClass().getSimpleName(), method.getName(), e.getMessage());
+			if (e instanceof ActorError) {
+				logger.warn(logMsg);
+				return new ActorResponseData(ActorResponseStatus.LOGIC_FAILED, e.getMessage(), null, null);
+			} else {
+				return getExceptionResponse(ActorResponseStatus.EXCEPTION, null, langs, logMsg, e);
+			}
 
 		} catch (Exception e) {
 
 			// Get error message: Command \"{0}\" method \"{1}.{2}(...)\" logic error: {3}".
-			String logMsg = locale.text("actor.invoke.logic.error", command.cmd, actor.getClass().getName(), method.getName(), e.getMessage());
-			// Check for logical error
-			if (e instanceof ActorError) {
-				// Logs info message
-				logger.info(logMsg);
-				// Return a logical message
-				return new ActorResponseData(ActorResponseStatus.LOGIC_FAILED, e.getMessage(), null, null);
-			} else {
-				// Return an exception response
-				return getExceptionResponse(ActorResponseStatus.EXCEPTION, null, langs, logMsg, e);
-			}
+			String logMsg = locale.text("actor.invoke.logic.error", command.cmd, actor.getClass().getSimpleName(), method.getName(), e.getMessage());
+			return getExceptionResponse(ActorResponseStatus.EXCEPTION, null, langs, logMsg, e);
 
 		}
+	}
+
+	/**
+	 * Gets an illegal argument message.
+	 * @param method The method.
+	 * @param params The parameters.
+	 * @return An illegal argument message.
+	 */
+	private final String getErrorParamTypesInfo(Method method, Serializable[] params) {
+		// Get method types
+		StringBuilder methodTypes = new StringBuilder("[");
+		Class<?>[] types = method.getParameterTypes();
+		for (int i = 0, c = types.length; i < c; i++) {
+			Class<?> type = types[i];
+			if (i > 0) methodTypes.append(", ");
+			methodTypes.append(type.getSimpleName());
+		}
+		methodTypes.append("]");
+		// Get parameter types
+		StringBuilder paramTypes = new StringBuilder();
+		if (params == null) {
+			paramTypes.append("null");
+		} else {
+			paramTypes.append("[");
+			for (int i = 0, c = params.length; i < c; i++) {
+				Serializable param = params[i];
+				if (i > 0) paramTypes.append(", ");
+				if (param == null) {
+					paramTypes.append("null");
+				} else {
+					paramTypes.append(param.getClass().getSimpleName());
+				}
+			}
+			paramTypes.append("]");
+		}
+		// Return text: The request argument types ({0}) is inconsistent with the method definition ({1}).
+		return locale.text("actor.invoke.params.types", paramTypes.toString(), methodTypes.toString());
+	}
+
+	/**
+	 * Gets the parameter value.
+	 * @param command Current command.
+	 * @param params Current parameters.
+	 * @return String value.
+	 */
+	private final String getParamValues(CommandContext command, Serializable[] params) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(command.actor.actorClass.getSimpleName()).append(".").append(command.method.getName()).append("(");
+		if (params != null) {
+			for (int i = 0, c = params.length; i < c; i++) {
+				Serializable param = params[i];
+				if (i > 0) sb.append(", ");
+				if (param == null) {
+					sb.append("null");
+				} else {
+					Class<?> type = param.getClass();
+					String name = type.getSimpleName();
+					sb.append(name).append(": ");
+					if (type.isPrimitive()) {
+						sb.append(param);
+					} else if (type == String.class) {
+						sb.append("\"").append(param).append("\"");
+					} else if (type == Boolean.class || type == Integer.class || type == Long.class || type == Float.class || type == Double.class || type == Short.class || type == Byte.class || type == Character.class) {
+						sb.append(param);
+					} else if (type == Date.class) {
+						sb.append("\"").append(ConvertHelper.formatDate((Date) param)).append("\"");
+					} else {
+						sb.append("Object");
+					}
+				}
+			}
+		}
+		sb.append(")");
+		return sb.toString();
+
 	}
 
 	/**
@@ -373,15 +514,13 @@ public class ActorInvoker {
 	 * @param e Error exception object.
 	 * @return Actor response data object.
 	 */
-	private final ActorResponseData getExceptionResponse(ActorResponseStatus status, String userMsg, String[] langs, String logMsg, Exception e) {
+	private final ActorResponseData getExceptionResponse(ActorResponseStatus status, String userMsg, String[] langs, String logMsg, Throwable e) {
 		// Logs error message
 		logger.error(logMsg, e);
-		// Get reference message
-		String ref = logMsg + "\r\n" + JavaHelper.getThrowableTrace(e);
 		// Get logical text
 		if (StringHelper.isEmpty(userMsg)) userMsg = FrameworkActor.getLocale(langs).text("actor.invoke.appex.error");
 		// Return an exception message
-		return new ActorResponseData(status, userMsg, ref, null);
+		return new ActorResponseData(status, userMsg, logMsg, null);
 	}
 
 }

@@ -14,6 +14,10 @@ public final class AsyncCallbackLocker implements AsyncCallback {
 	// --------------------------- Private fields ----------------------------
 
 	/**
+	 * Actor request data object (not null).
+	 */
+	private final ActorRequest request;
+	/**
 	 * The command context.
 	 */
 	private final CommandContext command;
@@ -50,11 +54,14 @@ public final class AsyncCallbackLocker implements AsyncCallback {
 
 	/**
 	 * Constructor for asynchronous callback lock handler.
+	 * @param request Actor request data object (not null).
 	 * @param command The command context (not null).
 	 * @param timeout Response timeout milliseconds (60,000ms by default).
+	 * @throws IllegalArgumentException An error is thrown when the parameter "request" or "command" is null.
 	 */
-	public AsyncCallbackLocker(CommandContext command, long timeout) {
-		if (command == null) throw new IllegalArgumentException("Parameter command can not be null!");
+	public AsyncCallbackLocker(ActorRequest request, CommandContext command, long timeout) {
+		if (request == null || command == null) throw new IllegalArgumentException("Parameter request or command can not be null!");
+		this.request = request;
 		if (timeout <= 0) timeout = command.timeout;
 		this.timeout = timeout <= 0 ? 60000 : timeout;
 		this.command = command;
@@ -145,12 +152,28 @@ public final class AsyncCallbackLocker implements AsyncCallback {
 		Serializable data = response.getData();
 		// Check for async data type
 		if (data != null && !(command.asyncDataType.isInstance(data))) {
+			// Get user message
+			String userMsg = FrameworkActor.getLocale(request.getLangs()).text("actor.invoke.appex.error");
 			// Get message: The data type "{0}" of the asynchronous callback is inconsistent with the data type "{1}" defined by command "{2}", the declaration method is "{3}.{4}(...)".
-			String msg = FrameworkActor.getLocale().text("actor.invoke.async.type", data.getClass().getName(), command.asyncDataType.getName(), command.cmd, command.actor.actorClass.getName(), command.method.getName());
+			String logMsg = FrameworkActor.getLocale().text("actor.invoke.async.type", data.getClass().getSimpleName(), command.asyncDataType.getSimpleName(), command.cmd, command.actor.actorClass.getSimpleName(), command.method.getName());
+			// Create new response
+			response = new ActorResponseData(ActorResponseStatus.EXCEPTION, userMsg, logMsg, null);
+			// Notify the locker to release and execute callback
+			callbackAndNotify(response);
 			// Throw exception
-			throw new IllegalArgumentException(msg);
+			throw new IllegalArgumentException(logMsg);
 		}
 
+		// Notify the locker to release and execute callback
+		callbackAndNotify(response);
+
+	}
+
+	/**
+	 * Notify the locker to release and execute callback.
+	 * @param response Actor response data.
+	 */
+	private final void callbackAndNotify(ActorResponse response) {
 		synchronized (lock) {
 			// Make sure to respond only once
 			if (hasCallbackResponse) return;
@@ -163,7 +186,6 @@ public final class AsyncCallbackLocker implements AsyncCallback {
 			// Will set the locked value to false in getLock() method after release
 			if (locked) lock.notifyAll();
 		}
-
 	}
 
 }

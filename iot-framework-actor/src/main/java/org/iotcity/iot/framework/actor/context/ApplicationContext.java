@@ -99,7 +99,7 @@ public final class ApplicationContext {
 	}
 
 	/**
-	 * Gets all modules in this application.
+	 * Gets all modules in this application (returns not null).
 	 * @return All modules in this application.
 	 */
 	public ModuleContext[] getAllModules() {
@@ -157,6 +157,19 @@ public final class ApplicationContext {
 	 */
 	public synchronized void clearModules() {
 		this.modules.clear();
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("{appID=\"");
+		sb.append(appID);
+		sb.append("\", appVersion=\"");
+		sb.append(version);
+		sb.append("\", enabled=");
+		sb.append(enabled);
+		sb.append("}");
+		return sb.toString();
 	}
 
 }

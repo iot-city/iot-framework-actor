@@ -14,7 +14,7 @@ public enum ActorResponseStatus {
 	 */
 	OK,
 	/**
-	 * The permission handler does not authorize the current request.
+	 * The permission context does not authorize the current request.
 	 */
 	UNAUTHORIZED,
 	/**

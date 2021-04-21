@@ -71,7 +71,7 @@ public final class ModuleContext {
 	}
 
 	/**
-	 * Gets all actors in this module.
+	 * Gets all actors in this module (returns not null).
 	 * @return All actors in this module.
 	 */
 	public ActorContext[] getAllActors() {
@@ -80,14 +80,14 @@ public final class ModuleContext {
 
 	/**
 	 * Add an actor to this module, if the actor ID has been created in this module, it will return the existing actor object directly.
-	 * @param permission The permission handler of this actor (not null).
+	 * @param permission The permission context of this actor (not null).
 	 * @param actorID Actor ID in module (not null or empty, equivalent to page ID).
 	 * @param actorClass The actor class (not null).
 	 * @param enabled Whether to enable this actor.
 	 * @param doc Document description of this actor.
 	 * @return The actor context that be created in this module (returns null if the actorID is invalid).
 	 */
-	public synchronized ActorContext addActor(PermissionHandler permission, String actorID, Class<?> actorClass, boolean enabled, String doc) {
+	public synchronized ActorContext addActor(PermissionContext permission, String actorID, Class<?> actorClass, boolean enabled, String doc) {
 		if (StringHelper.isEmpty(actorID)) return null;
 		ActorContext actor = this.actors.get(actorID.toUpperCase());
 		if (actor != null && actor.actorClass == actorClass) return actor;
@@ -137,6 +137,21 @@ public final class ModuleContext {
 	 */
 	public synchronized void clearActors() {
 		this.actors.clear();
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("{appID=\"");
+		sb.append(app.appID);
+		sb.append("\", appVersion=\"");
+		sb.append(app.version);
+		sb.append("\", moduleID=\"");
+		sb.append(moduleID);
+		sb.append("\", enabled=");
+		sb.append(enabled);
+		sb.append("}");
+		return sb.toString();
 	}
 
 }

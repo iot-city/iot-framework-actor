@@ -13,7 +13,7 @@ import org.iotcity.iot.framework.actor.config.ApplicationConfigPool;
 import org.iotcity.iot.framework.actor.context.ActorContext;
 import org.iotcity.iot.framework.actor.context.ApplicationContext;
 import org.iotcity.iot.framework.actor.context.ModuleContext;
-import org.iotcity.iot.framework.actor.context.PermissionHandler;
+import org.iotcity.iot.framework.actor.context.PermissionContext;
 import org.iotcity.iot.framework.core.annotation.AnnotationAnalyzer;
 import org.iotcity.iot.framework.core.annotation.AnnotationParser;
 import org.iotcity.iot.framework.core.config.Configurable;
@@ -87,7 +87,7 @@ public class ActorConfigure extends PropertiesConfigure<ApplicationContext[]> {
 			if (pool == null) {
 				taskHandler = TaskHandler.instance;
 			} else {
-				taskHandler = new TaskHandler("TASK-" + config.appID, pool.corePoolSize, pool.maximumPoolSize, pool.keepAliveTime, pool.capacity);
+				taskHandler = new TaskHandler(config.appID, pool.corePoolSize, pool.maximumPoolSize, pool.keepAliveTime, pool.capacity);
 			}
 
 			// Create application
@@ -161,7 +161,7 @@ public class ActorConfigure extends PropertiesConfigure<ApplicationContext[]> {
 				Permission permission = clazz.getAnnotation(Permission.class);
 				if (permission != null) licenses = permission.value();
 			}
-			PermissionHandler phandler = new PermissionHandler(licenses);
+			PermissionContext phandler = new PermissionContext(licenses);
 			ActorContext actorContext = module.addActor(phandler, actorID, clazz, actor.enabled(), actor.doc());
 
 			// Analyze methods
@@ -189,7 +189,7 @@ public class ActorConfigure extends PropertiesConfigure<ApplicationContext[]> {
 					Permission permission = method.getAnnotation(Permission.class);
 					if (permission != null) licenses = permission.value();
 				}
-				phandler = new PermissionHandler(licenses);
+				phandler = new PermissionContext(licenses);
 
 				// Create command context
 				actorContext.addCommand(phandler, cmd, method, command.timeout(), command.async(), command.enabled(), command.doc());

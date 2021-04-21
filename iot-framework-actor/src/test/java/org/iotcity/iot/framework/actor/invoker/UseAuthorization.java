@@ -1,4 +1,4 @@
-package org.iotcity.iot.framework.actor.permissions;
+package org.iotcity.iot.framework.actor.invoker;
 
 /**
  * @author Ardon
