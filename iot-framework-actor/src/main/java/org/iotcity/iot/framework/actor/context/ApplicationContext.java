@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.iotcity.iot.framework.actor.ActorManager;
+import org.iotcity.iot.framework.core.util.helper.JavaHelper;
 import org.iotcity.iot.framework.core.util.helper.StringHelper;
 import org.iotcity.iot.framework.core.util.task.TaskHandler;
 
@@ -19,10 +20,6 @@ public final class ApplicationContext {
 	 * (Readonly) The actor manager to which the application belongs (not null).
 	 */
 	public final ActorManager manager;
-	/**
-	 * Task handler objects supporting thread pool to execute tasks and timer tasks (not null).
-	 */
-	private TaskHandler taskHandler;
 	/**
 	 * (Readonly) Application ID (not null or empty).
 	 */
@@ -44,6 +41,10 @@ public final class ApplicationContext {
 	// --------------------------- Private fields ----------------------------
 
 	/**
+	 * Task handler objects supporting thread pool to execute tasks and timer tasks (not null).
+	 */
+	private TaskHandler taskHandler;
+	/**
 	 * All modules in this application, the key is module ID (upper case), the value is module context object.
 	 */
 	private final Map<String, ModuleContext> modules = new HashMap<>();
@@ -60,7 +61,7 @@ public final class ApplicationContext {
 	 * @param doc Document description of this application.
 	 * @throws IllegalArgumentException An error is thrown when the parameter "manager" or "appID" is null or empty.
 	 */
-	public ApplicationContext(ActorManager manager, TaskHandler taskHandler, String appID, String version, boolean enabled, String doc) {
+	public ApplicationContext(ActorManager manager, TaskHandler taskHandler, String appID, String version, boolean enabled, String doc) throws IllegalArgumentException {
 		if (manager == null || StringHelper.isEmpty(appID)) {
 			throw new IllegalArgumentException("Parameter manager, appID can not be null or empty!");
 		}
@@ -102,7 +103,7 @@ public final class ApplicationContext {
 	 * Gets all modules in this application (returns not null).
 	 * @return All modules in this application.
 	 */
-	public ModuleContext[] getAllModules() {
+	public ModuleContext[] getModules() {
 		return this.modules.values().toArray(new ModuleContext[this.modules.size()]);
 	}
 
@@ -168,6 +169,8 @@ public final class ApplicationContext {
 		sb.append(version);
 		sb.append("\", enabled=");
 		sb.append(enabled);
+		sb.append(", doc=");
+		JavaHelper.getDataPreview(doc, sb);
 		sb.append("}");
 		return sb.toString();
 	}

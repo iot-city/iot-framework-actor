@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 
 import org.iotcity.iot.framework.actor.annotation.NonAsync;
+import org.iotcity.iot.framework.core.util.helper.JavaHelper;
 import org.iotcity.iot.framework.core.util.helper.StringHelper;
 
 /**
@@ -66,7 +67,7 @@ public final class CommandContext {
 	 * @param doc Document description of this command.
 	 * @throws IllegalArgumentException An error is thrown when one of the parameters "actor", "permission", "cmd" or "method" is null or empty.
 	 */
-	CommandContext(ActorContext actor, PermissionContext permission, String cmd, Method method, long timeout, Class<? extends Serializable> async, boolean enabled, String doc) {
+	CommandContext(ActorContext actor, PermissionContext permission, String cmd, Method method, long timeout, Class<? extends Serializable> async, boolean enabled, String doc) throws IllegalArgumentException {
 		if (actor == null || permission == null || StringHelper.isEmpty(cmd) || method == null) {
 			throw new IllegalArgumentException("Parameter actor, permission, cmd and method can not be null or empty!");
 		}
@@ -108,6 +109,8 @@ public final class CommandContext {
 		sb.append(timeout);
 		sb.append(", enabled=");
 		sb.append(enabled);
+		sb.append(", doc=");
+		JavaHelper.getDataPreview(doc, sb);
 		sb.append("}");
 		return sb.toString();
 	}

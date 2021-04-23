@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.iotcity.iot.framework.actor.FrameworkActor;
+import org.iotcity.iot.framework.core.util.helper.JavaHelper;
 import org.iotcity.iot.framework.core.util.helper.StringHelper;
 
 /**
@@ -62,7 +63,7 @@ public final class ActorContext {
 	 * @param doc Document description of this actor.
 	 * @throws IllegalArgumentException An error is thrown when one of the parameters "module", "permission", "actorID" or "actorClass" is null or empty.
 	 */
-	ActorContext(ModuleContext module, PermissionContext permission, String actorID, Class<?> actorClass, boolean enabled, String doc) {
+	ActorContext(ModuleContext module, PermissionContext permission, String actorID, Class<?> actorClass, boolean enabled, String doc) throws IllegalArgumentException {
 		if (module == null || permission == null || StringHelper.isEmpty(actorID) || actorClass == null) {
 			throw new IllegalArgumentException("Parameter module, permission, actorID and actorClass can not be null or empty!");
 		}
@@ -88,7 +89,7 @@ public final class ActorContext {
 	 * Gets all commands in this actor.
 	 * @return All commands in this actor.
 	 */
-	public CommandContext[] getAllCommands() {
+	public CommandContext[] getCommands() {
 		return this.commands.values().toArray(new CommandContext[this.commands.size()]);
 	}
 
@@ -170,6 +171,8 @@ public final class ActorContext {
 		sb.append(actorClass.getName());
 		sb.append("\", enabled=");
 		sb.append(enabled);
+		sb.append(", doc=");
+		JavaHelper.getDataPreview(doc, sb);
 		sb.append("}");
 		return sb.toString();
 	}

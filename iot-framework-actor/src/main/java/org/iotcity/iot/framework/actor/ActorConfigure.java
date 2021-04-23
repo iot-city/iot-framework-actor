@@ -9,6 +9,7 @@ import org.iotcity.iot.framework.actor.annotation.Actor;
 import org.iotcity.iot.framework.actor.annotation.Command;
 import org.iotcity.iot.framework.actor.annotation.Permission;
 import org.iotcity.iot.framework.actor.config.ApplicationConfig;
+import org.iotcity.iot.framework.actor.config.ApplicationConfigModule;
 import org.iotcity.iot.framework.actor.config.ApplicationConfigPool;
 import org.iotcity.iot.framework.actor.context.ActorContext;
 import org.iotcity.iot.framework.actor.context.ApplicationContext;
@@ -62,21 +63,14 @@ public class ActorConfigure extends PropertiesConfigure<ApplicationContext[]> {
 		// Verify configurable object class
 		if (configurable == null || !(configurable instanceof ActorManager)) return false;
 
-		// Get application configure keys
-		String apps = props.getProperty("iot.framework.actor.apps");
-		if (apps == null || apps.length() == 0) return false;
-		String[] keys = apps.split("[,;]");
-		if (keys == null || keys.length == 0) return false;
+		// Get application configures
+		ApplicationConfig[] configs = PropertiesLoader.getConfigArray(ApplicationConfig.class, props, "iot.framework.actor.apps");
+		if (configs == null || configs.length == 0) return false;
 
 		// Create list
 		List<ApplicationContext> list = new ArrayList<>();
 		// Traverse all application configurations
-		for (int i = 0, c = keys.length; i < c; i++) {
-			String appKey = keys[i].trim();
-			if (appKey.length() == 0) continue;
-
-			// Load application configure
-			ApplicationConfig config = PropertiesLoader.getConfigBean(ApplicationConfig.class, props, "iot.framework.actor.apps." + appKey);
+		for (ApplicationConfig config : configs) {
 			if (config == null || StringHelper.isEmpty(config.appID)) continue;
 			if (config.packages == null || config.packages.length == 0) continue;
 
@@ -89,9 +83,16 @@ public class ActorConfigure extends PropertiesConfigure<ApplicationContext[]> {
 			} else {
 				taskHandler = new TaskHandler(config.appID, pool.corePoolSize, pool.maximumPoolSize, pool.keepAliveTime, pool.capacity);
 			}
-
 			// Create application
 			ApplicationContext app = new ApplicationContext((ActorManager) configurable, taskHandler, config.appID, config.version, config.enabled, config.doc);
+			// Add all predefined modules
+			ApplicationConfigModule[] modules = config.modules;
+			if (modules != null && modules.length > 0) {
+				for (ApplicationConfigModule module : modules) {
+					if (module == null || StringHelper.isEmpty(module.moduleID)) continue;
+					app.addModule(module.moduleID, module.enabled, module.doc);
+				}
+			}
 			// Add to list
 			list.add(app);
 
@@ -136,7 +137,7 @@ public class ActorConfigure extends PropertiesConfigure<ApplicationContext[]> {
 		 * @param app Application context object (not null)
 		 * @throws IllegalArgumentException An error is thrown when the parameter "app" is null.
 		 */
-		public ActorAnnotationParser(ApplicationContext app) {
+		public ActorAnnotationParser(ApplicationContext app) throws IllegalArgumentException {
 			if (app == null) throw new IllegalArgumentException("Parameter app can not be null!");
 			this.app = app;
 			this.logger = FrameworkActor.getLogger();
@@ -145,12 +146,14 @@ public class ActorConfigure extends PropertiesConfigure<ApplicationContext[]> {
 
 		@Override
 		public final void parse(Class<?> clazz) {
+			// System.out.println(">>>>>>>>>>>>: " + clazz.getName());
 			if (!clazz.isAnnotationPresent(Actor.class)) return;
 
 			// Get actor annotation
 			Actor actor = clazz.getAnnotation(Actor.class);
 			String actorID = StringHelper.trim(actor.actorID());
 			String moduleID = StringHelper.trim(actor.moduleID());
+			if (actorID.length() == 0 || moduleID.length() == 0) return;
 
 			// Create or get a module context
 			ModuleContext module = this.app.addModule(moduleID, true, "");

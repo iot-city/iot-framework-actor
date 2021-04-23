@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.iotcity.iot.framework.actor.FrameworkActor;
+import org.iotcity.iot.framework.core.util.helper.JavaHelper;
 import org.iotcity.iot.framework.core.util.helper.StringHelper;
 
 /**
@@ -50,7 +51,7 @@ public final class ModuleContext {
 	 * @param doc Document description of this module.
 	 * @throws IllegalArgumentException An error is thrown when the parameter "app" or "moduleID" is null or empty.
 	 */
-	ModuleContext(ApplicationContext app, String moduleID, boolean enabled, String doc) {
+	ModuleContext(ApplicationContext app, String moduleID, boolean enabled, String doc) throws IllegalArgumentException {
 		if (app == null || StringHelper.isEmpty(moduleID)) {
 			throw new IllegalArgumentException("Parameter app and moduleID can not be null or empty!");
 		}
@@ -74,7 +75,7 @@ public final class ModuleContext {
 	 * Gets all actors in this module (returns not null).
 	 * @return All actors in this module.
 	 */
-	public ActorContext[] getAllActors() {
+	public ActorContext[] getActors() {
 		return this.actors.values().toArray(new ActorContext[this.actors.size()]);
 	}
 
@@ -150,6 +151,8 @@ public final class ModuleContext {
 		sb.append(moduleID);
 		sb.append("\", enabled=");
 		sb.append(enabled);
+		sb.append(", doc=");
+		JavaHelper.getDataPreview(doc, sb);
 		sb.append("}");
 		return sb.toString();
 	}

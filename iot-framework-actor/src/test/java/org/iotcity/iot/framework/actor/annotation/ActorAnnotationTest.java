@@ -22,18 +22,18 @@ public class ActorAnnotationTest extends TestCase {
 		ActorManager manager = new ActorManager();
 		ActorConfigure configure = new ActorConfigure("org/iotcity/iot/framework/actor/iot-actor-template.properties", true);
 		configure.config(manager, true);
-		ApplicationContext[] apps = manager.getAllApplications();
+		ApplicationContext[] apps = manager.getApplications();
 		for (ApplicationContext app : apps) {
 			System.out.println("============================= APP (" + app.appID + ") ==============================");
 			System.out.println("> APP: " + app.toString());
-			ModuleContext[] modules = app.getAllModules();
+			ModuleContext[] modules = app.getModules();
 			for (ModuleContext module : modules) {
 				System.out.println("---------------------------- MODULE (" + module.moduleID + ") -----------------------------");
 				System.out.println("> MODULE: " + module.toString());
-				ActorContext[] actors = module.getAllActors();
+				ActorContext[] actors = module.getActors();
 				for (ActorContext actor : actors) {
 					System.out.println("> ACTOR: " + actor.toString());
-					CommandContext[] cmds = actor.getAllCommands();
+					CommandContext[] cmds = actor.getCommands();
 					for (CommandContext cmd : cmds) {
 						System.out.println("> CMD: " + cmd.toString());
 					}

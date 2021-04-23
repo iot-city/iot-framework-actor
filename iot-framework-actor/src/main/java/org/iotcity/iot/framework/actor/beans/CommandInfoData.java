@@ -7,7 +7,7 @@ import org.iotcity.iot.framework.actor.context.CommandContext;
 import org.iotcity.iot.framework.actor.context.ModuleContext;
 
 /**
- * The command information data in method runtime.
+ * Command information data in method runtime.
  * @author Ardon
  */
 public final class CommandInfoData implements CommandInfo {

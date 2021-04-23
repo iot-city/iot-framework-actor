@@ -77,7 +77,7 @@ public class ActorManager implements Configurable<ApplicationContext[]> {
 	 * Gets all applications in this actor manager (returns not null).
 	 * @return All applications in manager.
 	 */
-	public ApplicationContext[] getAllApplications() {
+	public ApplicationContext[] getApplications() {
 		return this.apps.values().toArray(new ApplicationContext[this.apps.size()]);
 	}
 

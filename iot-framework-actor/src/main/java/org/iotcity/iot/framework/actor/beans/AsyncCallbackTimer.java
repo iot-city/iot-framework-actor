@@ -90,7 +90,7 @@ public final class AsyncCallbackTimer implements AsyncCallback {
 	 * @param timeout Waiting for response timeout milliseconds (60,000ms by default).
 	 * @throws IllegalArgumentException An error is thrown when one of the parameters "request", "command" or "callback" is null.
 	 */
-	public AsyncCallbackTimer(ActorRequest request, CommandContext command, ActorResponseCallback callback, long timeout) {
+	public AsyncCallbackTimer(ActorRequest request, CommandContext command, ActorResponseCallback callback, long timeout) throws IllegalArgumentException {
 		if (request == null || command == null || callback == null) throw new IllegalArgumentException("Parameter request, command or callback can not be null!");
 		this.request = request;
 		this.command = command;

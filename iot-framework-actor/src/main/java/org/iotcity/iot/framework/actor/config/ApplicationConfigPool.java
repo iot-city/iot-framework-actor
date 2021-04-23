@@ -1,11 +1,11 @@
 package org.iotcity.iot.framework.actor.config;
 
 /**
- * The thread pool executor configure data of application.<br/>
+ * Thread pool executor configure data of application.<br/>
  * This configuration will be used for asynchronous callback response task processing and actor procedure processing.
  * @author Ardon
  */
-public class ApplicationConfigPool {
+public final class ApplicationConfigPool {
 
 	/**
 	 * The number of threads to keep in the pool (0 by default).

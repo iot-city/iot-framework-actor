@@ -1,7 +1,7 @@
 package org.iotcity.iot.framework.actor.config;
 
 /**
- * Application configure bean.
+ * Application configure data.
  * @author Ardon
  */
 public class ApplicationConfig {
@@ -13,11 +13,11 @@ public class ApplicationConfig {
 	/**
 	 * The application version.
 	 */
-	public String version;
+	public String version = "1.0.0";
 	/**
 	 * Whether to enable this application.
 	 */
-	public boolean enabled;
+	public boolean enabled = true;
 	/**
 	 * Packages that need to be parsed.
 	 */
@@ -36,5 +36,10 @@ public class ApplicationConfig {
 	 * 2. When set it to null, the global task handler instance in framework core is used.
 	 */
 	public ApplicationConfigPool pool;
+	/**
+	 * Modules definition within an application.<br/>
+	 * Use this configuration to enable or disable the module, and the module ID is consistent with the module ID defined in actor.
+	 */
+	public ApplicationConfigModule[] modules;
 
 }

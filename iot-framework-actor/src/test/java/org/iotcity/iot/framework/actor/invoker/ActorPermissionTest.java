@@ -67,7 +67,7 @@ public class ActorPermissionTest extends TestCase {
 						return permission.contains(UseAuthorization.VIEW);
 					case 3:
 						// Check user permission by custom value permitted in OR mode.
-						return permission.containsAll(UseAuthorization.CONFIG, UseAuthorization.EDIT);
+						return permission.contains(UseAuthorization.CONFIG, UseAuthorization.EDIT);
 					default:
 						break;
 					}

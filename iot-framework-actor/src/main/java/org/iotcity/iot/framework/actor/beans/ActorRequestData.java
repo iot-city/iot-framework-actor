@@ -1,9 +1,8 @@
 package org.iotcity.iot.framework.actor.beans;
 
 import java.io.Serializable;
-import java.util.Date;
 
-import org.iotcity.iot.framework.core.util.helper.ConvertHelper;
+import org.iotcity.iot.framework.core.util.helper.JavaHelper;
 import org.iotcity.iot.framework.core.util.helper.StringHelper;
 
 /**
@@ -52,7 +51,7 @@ public class ActorRequestData implements ActorRequest {
 	 * @param params The array of parameters that be used to invoke the method.
 	 * @throws IllegalArgumentException An error is thrown when one of the parameters "appID", "moduleID", "actorID" or "cmd" is null or empty.
 	 */
-	public ActorRequestData(String[] langs, String appID, String appVersion, String moduleID, String actorID, String cmd, Serializable... params) {
+	public ActorRequestData(String[] langs, String appID, String appVersion, String moduleID, String actorID, String cmd, Serializable... params) throws IllegalArgumentException {
 		if (StringHelper.isEmpty(appID) || StringHelper.isEmpty(moduleID) || StringHelper.isEmpty(actorID) || StringHelper.isEmpty(cmd)) {
 			throw new IllegalArgumentException("Parameter appID, moduleID, actorID and cmd can not be null or empty!");
 		}
@@ -114,32 +113,7 @@ public class ActorRequestData implements ActorRequest {
 		sb.append("\", cmd=\"");
 		sb.append(cmd);
 		sb.append("\", params=");
-		if (params == null) {
-			sb.append("null");
-		} else {
-			sb.append("[");
-			for (int i = 0, c = params.length; i < c; i++) {
-				Serializable param = params[i];
-				if (i > 0) sb.append(", ");
-				if (param == null) {
-					sb.append("null");
-				} else {
-					Class<?> type = param.getClass();
-					if (type.isPrimitive()) {
-						sb.append(param);
-					} else if (type == String.class) {
-						sb.append("\"").append(param).append("\"");
-					} else if (type == Boolean.class || type == Integer.class || type == Long.class || type == Float.class || type == Double.class || type == Short.class || type == Byte.class || type == Character.class) {
-						sb.append(param);
-					} else if (type == Date.class) {
-						sb.append("\"").append(ConvertHelper.formatDate((Date) param)).append("\"");
-					} else {
-						sb.append("Object(").append(type.getSimpleName()).append(")");
-					}
-				}
-			}
-			sb.append("]");
-		}
+		JavaHelper.getArrayPreview(params, sb, false);
 		sb.append("}");
 		return sb.toString();
 	}

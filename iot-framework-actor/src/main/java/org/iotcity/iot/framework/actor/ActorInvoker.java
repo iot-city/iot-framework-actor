@@ -3,7 +3,6 @@ package org.iotcity.iot.framework.actor;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Date;
 
 import org.iotcity.iot.framework.actor.beans.ActorAuthorizer;
 import org.iotcity.iot.framework.actor.beans.ActorError;
@@ -20,7 +19,7 @@ import org.iotcity.iot.framework.actor.beans.CommandInfoData;
 import org.iotcity.iot.framework.actor.context.CommandContext;
 import org.iotcity.iot.framework.core.i18n.LocaleText;
 import org.iotcity.iot.framework.core.logging.Logger;
-import org.iotcity.iot.framework.core.util.helper.ConvertHelper;
+import org.iotcity.iot.framework.core.util.helper.JavaHelper;
 import org.iotcity.iot.framework.core.util.helper.StringHelper;
 
 /**
@@ -61,7 +60,7 @@ public class ActorInvoker {
 	 * @param authorizer The actor authorizer for permission verification (optional, set to null when permission verification is not required).
 	 * @throws IllegalArgumentException An error is thrown when the parameter "manager" is null.
 	 */
-	public ActorInvoker(ActorManager manager, ActorFactory actors, ActorAuthorizer authorizer) {
+	public ActorInvoker(ActorManager manager, ActorFactory actors, ActorAuthorizer authorizer) throws IllegalArgumentException {
 		if (manager == null) throw new IllegalArgumentException("Parameter manager can not be null!");
 		this.manager = manager;
 		this.actors = actors;
@@ -79,7 +78,7 @@ public class ActorInvoker {
 	 * @return Actor response data object.
 	 * @throws IllegalArgumentException An error is thrown when the parameter "request" is null.
 	 */
-	public ActorResponse syncInvoke(ActorRequest request, long timeout) {
+	public ActorResponse syncInvoke(ActorRequest request, long timeout) throws IllegalArgumentException {
 		// Parameter verification
 		if (request == null) throw new IllegalArgumentException("Parameter request can not be null!");
 
@@ -222,7 +221,7 @@ public class ActorInvoker {
 	 * @param timeout Response timeout milliseconds for command async mode only (optional, if set timeout to 0, it will use the command.timeout defined or 60000ms by default).
 	 * @throws IllegalArgumentException An error is thrown when the parameter "request" or "callback" is null.
 	 */
-	public void asyncInvoke(ActorRequest request, ActorResponseCallback callback, long timeout) {
+	public void asyncInvoke(ActorRequest request, ActorResponseCallback callback, long timeout) throws IllegalArgumentException {
 		// Parameter verification
 		if (request == null || callback == null) throw new IllegalArgumentException("Parameter request and callback can not be null!");
 
@@ -438,33 +437,11 @@ public class ActorInvoker {
 	 */
 	private final String getErrorParamTypesInfo(Method method, Serializable[] params) {
 		// Get method types
-		StringBuilder methodTypes = new StringBuilder("[");
-		Class<?>[] types = method.getParameterTypes();
-		for (int i = 0, c = types.length; i < c; i++) {
-			Class<?> type = types[i];
-			if (i > 0) methodTypes.append(", ");
-			methodTypes.append(type.getSimpleName());
-		}
-		methodTypes.append("]");
+		String methodString = JavaHelper.getTypesPreview(method.getParameterTypes());
 		// Get parameter types
-		StringBuilder paramTypes = new StringBuilder();
-		if (params == null) {
-			paramTypes.append("null");
-		} else {
-			paramTypes.append("[");
-			for (int i = 0, c = params.length; i < c; i++) {
-				Serializable param = params[i];
-				if (i > 0) paramTypes.append(", ");
-				if (param == null) {
-					paramTypes.append("null");
-				} else {
-					paramTypes.append(param.getClass().getSimpleName());
-				}
-			}
-			paramTypes.append("]");
-		}
+		String paramString = JavaHelper.getDataTypesPreview(params);
 		// Return text: The request argument types ({0}) is inconsistent with the method definition ({1}).
-		return locale.text("actor.invoke.params.types", paramTypes.toString(), methodTypes.toString());
+		return locale.text("actor.invoke.params.types", methodString, paramString);
 	}
 
 	/**
@@ -476,33 +453,9 @@ public class ActorInvoker {
 	private final String getParamValues(CommandContext command, Serializable[] params) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(command.actor.actorClass.getSimpleName()).append(".").append(command.method.getName()).append("(");
-		if (params != null) {
-			for (int i = 0, c = params.length; i < c; i++) {
-				Serializable param = params[i];
-				if (i > 0) sb.append(", ");
-				if (param == null) {
-					sb.append("null");
-				} else {
-					Class<?> type = param.getClass();
-					String name = type.getSimpleName();
-					sb.append(name).append(": ");
-					if (type.isPrimitive()) {
-						sb.append(param);
-					} else if (type == String.class) {
-						sb.append("\"").append(param).append("\"");
-					} else if (type == Boolean.class || type == Integer.class || type == Long.class || type == Float.class || type == Double.class || type == Short.class || type == Byte.class || type == Character.class) {
-						sb.append(param);
-					} else if (type == Date.class) {
-						sb.append("\"").append(ConvertHelper.formatDate((Date) param)).append("\"");
-					} else {
-						sb.append("Object");
-					}
-				}
-			}
-		}
+		JavaHelper.getArrayPreview(params, sb, true);
 		sb.append(")");
 		return sb.toString();
-
 	}
 
 	/**
