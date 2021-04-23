@@ -180,7 +180,7 @@ public class ActorConfigure extends PropertiesConfigure<ApplicationContext[]> {
 
 				// Verify serializable return type
 				Class<?> returnType = method.getReturnType();
-				if (returnType != Void.class && !returnType.isPrimitive() && !(returnType instanceof Serializable)) {
+				if (returnType != Void.class && !returnType.isPrimitive() && !(Serializable.class.isAssignableFrom(returnType))) {
 					// Logs error message
 					logger.error(locale.text("actor.config.method.error", cmd, clazz.getName(), method.getName(), method.getReturnType().getClass().getName()));
 					continue;
