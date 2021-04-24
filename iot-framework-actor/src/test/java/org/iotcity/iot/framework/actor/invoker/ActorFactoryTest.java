@@ -6,6 +6,7 @@ import org.iotcity.iot.framework.actor.ActorManager;
 import org.iotcity.iot.framework.actor.FrameworkActor;
 import org.iotcity.iot.framework.actor.beans.ActorError;
 import org.iotcity.iot.framework.actor.beans.ActorFactory;
+import org.iotcity.iot.framework.actor.beans.ActorInvokerOptions;
 import org.iotcity.iot.framework.actor.beans.ActorRequest;
 import org.iotcity.iot.framework.actor.beans.ActorRequestData;
 import org.iotcity.iot.framework.actor.beans.ActorResponse;
@@ -30,7 +31,8 @@ public class ActorFactoryTest extends TestCase {
 		ActorManager manager = new ActorManager();
 		ActorConfigure configure = new ActorConfigure("org/iotcity/iot/framework/actor/iot-actor-template.properties", true);
 		configure.config(manager, true);
-		ActorInvoker invoker = new ActorInvoker(manager, new ActorFactory() {
+		ActorInvokerOptions options = new ActorInvokerOptions();
+		options.factory = new ActorFactory() {
 
 			@Override
 			public Object getInstance(ActorRequest request, CommandInfo info) throws ActorError {
@@ -58,7 +60,9 @@ public class ActorFactoryTest extends TestCase {
 				return null;
 			}
 
-		}, null);
+		};
+		// Create invoker
+		ActorInvoker invoker = new ActorInvoker(manager, options);
 
 		// Test factory default reject case.
 		testFactoryDefaultReject(invoker);

@@ -26,7 +26,8 @@ public class ActorDisalbedTest extends TestCase {
 		ActorManager manager = new ActorManager();
 		ActorConfigure configure = new ActorConfigure("org/iotcity/iot/framework/actor/iot-actor-template.properties", true);
 		configure.config(manager, true);
-		ActorInvoker invoker = new ActorInvoker(manager, null, null);
+		// Create invoker
+		ActorInvoker invoker = new ActorInvoker(manager);
 
 		// Test actor
 		ActorRequest request = new ActorRequestData(null, "DemoApp1", "1.0.0", "DISABLED", "ActorDisabled", "test-actor-disabled");

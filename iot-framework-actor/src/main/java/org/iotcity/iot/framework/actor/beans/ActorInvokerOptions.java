@@ -1,0 +1,30 @@
+package org.iotcity.iot.framework.actor.beans;
+
+import org.iotcity.iot.framework.core.i18n.LocaleText;
+import org.iotcity.iot.framework.core.logging.Logger;
+
+/**
+ * Actor invoker options.
+ * @author Ardon
+ * @date 2021-04-24
+ */
+public class ActorInvokerOptions {
+
+	/**
+	 * Create an actor for business logic factory (optional, it can be set to null when using <b>new</b> to create an instance).
+	 */
+	public ActorFactory factory;
+	/**
+	 * The actor authorizer for permission verification (optional, Set to null when permission verification is not required).
+	 */
+	public ActorAuthorizer authorizer;
+	/**
+	 * The logger from manager (optional, it can be set to null when using FrameworkActor logger instance).
+	 */
+	public Logger logger;
+	/**
+	 * The locale language text object (optional, it can be set to null when using FrameworkActor locale instance).
+	 */
+	public LocaleText locale;
+
+}

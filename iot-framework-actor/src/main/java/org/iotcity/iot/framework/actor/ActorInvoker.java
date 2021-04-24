@@ -7,6 +7,7 @@ import java.lang.reflect.Method;
 import org.iotcity.iot.framework.actor.beans.ActorAuthorizer;
 import org.iotcity.iot.framework.actor.beans.ActorError;
 import org.iotcity.iot.framework.actor.beans.ActorFactory;
+import org.iotcity.iot.framework.actor.beans.ActorInvokerOptions;
 import org.iotcity.iot.framework.actor.beans.ActorRequest;
 import org.iotcity.iot.framework.actor.beans.ActorResponse;
 import org.iotcity.iot.framework.actor.beans.ActorResponseCallback;
@@ -37,7 +38,7 @@ public class ActorInvoker {
 	/**
 	 * Create an actor for business logic factory (optional, it can be set to null when using <b>new</b> to create an instance).
 	 */
-	protected final ActorFactory actors;
+	protected final ActorFactory factory;
 	/**
 	 * The actor authorizer for permission verification (optional, Set to null when permission verification is not required).
 	 */
@@ -56,17 +57,32 @@ public class ActorInvoker {
 	/**
 	 * Constructor for actor invoker.
 	 * @param manager The actor manager (not null, use to provide information for all actors).
-	 * @param actors Create an actor for business logic factory (optional, it can be set to null when using Class.newInstance() to create an instance).
-	 * @param authorizer The actor authorizer for permission verification (optional, set to null when permission verification is not required).
 	 * @throws IllegalArgumentException An error is thrown when the parameter "manager" is null.
 	 */
-	public ActorInvoker(ActorManager manager, ActorFactory actors, ActorAuthorizer authorizer) throws IllegalArgumentException {
+	public ActorInvoker(ActorManager manager) throws IllegalArgumentException {
+		this(manager, null);
+	}
+
+	/**
+	 * Constructor for actor invoker.
+	 * @param manager The actor manager (not null, use to provide information for all actors).
+	 * @param options The invoker options, you can set actor factory, authorizer, logger or locale in this options (optional, it can be set to null when using the default configure).
+	 * @throws IllegalArgumentException An error is thrown when the parameter "manager" is null.
+	 */
+	public ActorInvoker(ActorManager manager, ActorInvokerOptions options) throws IllegalArgumentException {
 		if (manager == null) throw new IllegalArgumentException("Parameter manager can not be null!");
 		this.manager = manager;
-		this.actors = actors;
-		this.authorizer = authorizer;
-		this.logger = FrameworkActor.getLogger();
-		this.locale = FrameworkActor.getLocale();
+		if (options != null) {
+			this.factory = options.factory;
+			this.authorizer = options.authorizer;
+			this.logger = options.logger == null ? FrameworkActor.getLogger() : options.logger;
+			this.locale = options.locale == null ? FrameworkActor.getLocale() : options.locale;
+		} else {
+			this.factory = null;
+			this.authorizer = null;
+			this.logger = FrameworkActor.getLogger();
+			this.locale = FrameworkActor.getLocale();
+		}
 	}
 
 	// ---------------------------------- Public synchronous invoke method ----------------------------------
@@ -161,7 +177,7 @@ public class ActorInvoker {
 		// Create an actor object
 		Object actor;
 		try {
-			actor = actors == null ? actorClass.newInstance() : actors.getInstance(request, info);
+			actor = factory == null ? actorClass.newInstance() : factory.getInstance(request, info);
 		} catch (Exception e) {
 
 			// Get message
@@ -309,7 +325,7 @@ public class ActorInvoker {
 		// Create an actor object
 		Object actor;
 		try {
-			actor = actors == null ? actorClass.newInstance() : actors.getInstance(request, info);
+			actor = factory == null ? actorClass.newInstance() : factory.getInstance(request, info);
 		} catch (Exception e) {
 
 			// Get message

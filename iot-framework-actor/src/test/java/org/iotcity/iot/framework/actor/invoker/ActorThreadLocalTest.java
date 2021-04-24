@@ -28,7 +28,8 @@ public class ActorThreadLocalTest extends TestCase {
 		ActorManager manager = new ActorManager();
 		ActorConfigure configure = new ActorConfigure("org/iotcity/iot/framework/actor/iot-actor-template.properties", true);
 		configure.config(manager, true);
-		ActorInvoker invoker = new ActorInvoker(manager, null, null);
+		// Create invoker
+		ActorInvoker invoker = new ActorInvoker(manager);
 		// Run task one
 		TaskHandler.instance.run(new Runnable() {
 

@@ -6,6 +6,7 @@ import org.iotcity.iot.framework.actor.ActorManager;
 import org.iotcity.iot.framework.actor.FrameworkActor;
 import org.iotcity.iot.framework.actor.beans.ActorAuthorizer;
 import org.iotcity.iot.framework.actor.beans.ActorError;
+import org.iotcity.iot.framework.actor.beans.ActorInvokerOptions;
 import org.iotcity.iot.framework.actor.beans.ActorRequest;
 import org.iotcity.iot.framework.actor.beans.ActorRequestData;
 import org.iotcity.iot.framework.actor.beans.ActorResponse;
@@ -31,7 +32,8 @@ public class ActorPermissionTest extends TestCase {
 		ActorManager manager = new ActorManager();
 		ActorConfigure configure = new ActorConfigure("org/iotcity/iot/framework/actor/iot-actor-template.properties", true);
 		configure.config(manager, true);
-		ActorInvoker invoker = new ActorInvoker(manager, null, new ActorAuthorizer() {
+		ActorInvokerOptions options = new ActorInvokerOptions();
+		options.authorizer = new ActorAuthorizer() {
 
 			@Override
 			public boolean verifyPermission(ActorRequest request, CommandInfo info) throws ActorError {
@@ -78,7 +80,9 @@ public class ActorPermissionTest extends TestCase {
 				return false;
 			}
 
-		});
+		};
+		// Create invoker
+		ActorInvoker invoker = new ActorInvoker(manager, options);
 
 		// Check user permission by default value forbidden.
 		checkPermissionByDefaultForbidden(invoker);
