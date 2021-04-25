@@ -46,7 +46,7 @@ public interface AsyncCallback {
 	/**
 	 * Callback response data (e.g. {@link ActorResponseData } ).
 	 * @param response Response data that implements from {@link ActorResponse } interface (not null).
-	 * @throws IllegalArgumentException An error is thrown when the data type of the asynchronous callback is inconsistent with the data type defined by command.
+	 * @throws IllegalArgumentException An error will be thrown when the data type of the asynchronous callback is inconsistent with the data type defined by command.
 	 */
 	void callback(ActorResponse response) throws IllegalArgumentException;
 

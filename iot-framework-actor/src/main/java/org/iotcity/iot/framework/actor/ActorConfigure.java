@@ -38,7 +38,7 @@ public class ActorConfigure extends PropertiesConfigure<ApplicationContext[]> {
 	 * <b>(Actor configure template file: "org/iotcity/iot/framework/actor/iot-actor-template.properties")</b>
 	 * @param configFile The configure properties file to load (required, not null or empty).
 	 * @param fromPackage Whether load the file from package.
-	 * @throws IllegalArgumentException An error is thrown when the parameter is null.
+	 * @throws IllegalArgumentException An error will be thrown when the parameter "configFile" is null.
 	 */
 	public ActorConfigure(String configFile, boolean fromPackage) {
 		super(configFile, fromPackage);
@@ -50,7 +50,7 @@ public class ActorConfigure extends PropertiesConfigure<ApplicationContext[]> {
 	 * @param configFile The configure properties file to load (required, not null or empty).
 	 * @param encoding Text encoding (optional, e.g. "UTF-8", if it is set to null, it will be judged automatically).
 	 * @param fromPackage Whether load the file from package.
-	 * @throws IllegalArgumentException An error is thrown when the parameter is null.
+	 * @throws IllegalArgumentException An error will be thrown when the parameter "configFile" is null.
 	 */
 	public ActorConfigure(String configFile, String encoding, boolean fromPackage) {
 		super(configFile, encoding, fromPackage);
@@ -135,7 +135,7 @@ public class ActorConfigure extends PropertiesConfigure<ApplicationContext[]> {
 		/**
 		 * Constructor for actor annotation parser
 		 * @param app Application context object (not null)
-		 * @throws IllegalArgumentException An error is thrown when the parameter "app" is null.
+		 * @throws IllegalArgumentException An error will be thrown when the parameter "app" is null.
 		 */
 		public ActorAnnotationParser(ApplicationContext app) throws IllegalArgumentException {
 			if (app == null) throw new IllegalArgumentException("Parameter app can not be null!");

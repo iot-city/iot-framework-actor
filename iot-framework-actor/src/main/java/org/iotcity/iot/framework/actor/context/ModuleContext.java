@@ -49,7 +49,7 @@ public final class ModuleContext {
 	 * @param moduleID Module ID in application (not null or empty).
 	 * @param enabled Whether to enable this module.
 	 * @param doc Document description of this module.
-	 * @throws IllegalArgumentException An error is thrown when the parameter "app" or "moduleID" is null or empty.
+	 * @throws IllegalArgumentException An error will be thrown when the parameter "app" or "moduleID" is null or empty.
 	 */
 	ModuleContext(ApplicationContext app, String moduleID, boolean enabled, String doc) throws IllegalArgumentException {
 		if (app == null || StringHelper.isEmpty(moduleID)) {

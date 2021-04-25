@@ -49,7 +49,7 @@ public class ActorRequestData implements ActorRequest {
 	 * @param actorID Actor ID in module (not null or empty, equivalent to page ID).
 	 * @param cmd The command ID in the actor (not null or empty).
 	 * @param params The array of parameters that be used to invoke the method.
-	 * @throws IllegalArgumentException An error is thrown when one of the parameters "appID", "moduleID", "actorID" or "cmd" is null or empty.
+	 * @throws IllegalArgumentException An error will be thrown when one of the parameters "appID", "moduleID", "actorID" or "cmd" is null or empty.
 	 */
 	public ActorRequestData(String[] langs, String appID, String appVersion, String moduleID, String actorID, String cmd, Serializable... params) throws IllegalArgumentException {
 		if (StringHelper.isEmpty(appID) || StringHelper.isEmpty(moduleID) || StringHelper.isEmpty(actorID) || StringHelper.isEmpty(cmd)) {

@@ -57,7 +57,7 @@ public final class AsyncCallbackLocker implements AsyncCallback {
 	 * @param request Actor request data object (not null).
 	 * @param commandInfo The command information object (not null).
 	 * @param timeout Response timeout milliseconds (60,000ms by default).
-	 * @throws IllegalArgumentException An error is thrown when the parameter "request" or "info" is null.
+	 * @throws IllegalArgumentException An error will be thrown when the parameter "request" or "info" is null.
 	 */
 	public AsyncCallbackLocker(ActorRequest request, CommandInfo commandInfo, long timeout) throws IllegalArgumentException {
 		if (request == null || commandInfo == null) throw new IllegalArgumentException("Parameter request or commandInfo can not be null!");

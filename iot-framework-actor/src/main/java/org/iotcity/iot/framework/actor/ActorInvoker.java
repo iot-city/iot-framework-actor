@@ -57,7 +57,7 @@ public class ActorInvoker {
 	/**
 	 * Constructor for actor invoker.
 	 * @param manager The actor manager (not null, use to provide information for all actors).
-	 * @throws IllegalArgumentException An error is thrown when the parameter "manager" is null.
+	 * @throws IllegalArgumentException An error will be thrown when the parameter "manager" is null.
 	 */
 	public ActorInvoker(ActorManager manager) throws IllegalArgumentException {
 		this(manager, null);
@@ -67,7 +67,7 @@ public class ActorInvoker {
 	 * Constructor for actor invoker.
 	 * @param manager The actor manager (not null, use to provide information for all actors).
 	 * @param options The invoker options, you can set actor factory, authorizer, logger or locale in this options (optional, it can be set to null when using the default configure).
-	 * @throws IllegalArgumentException An error is thrown when the parameter "manager" is null.
+	 * @throws IllegalArgumentException An error will be thrown when the parameter "manager" is null.
 	 */
 	public ActorInvoker(ActorManager manager, ActorInvokerOptions options) throws IllegalArgumentException {
 		if (manager == null) throw new IllegalArgumentException("Parameter manager can not be null!");
@@ -92,7 +92,7 @@ public class ActorInvoker {
 	 * @param request Actor request data object (not null).
 	 * @param timeout Response timeout milliseconds for command async mode only (optional, if set timeout to 0, it will use the command.timeout defined or 60000ms by default).
 	 * @return Actor response data object.
-	 * @throws IllegalArgumentException An error is thrown when the parameter "request" is null.
+	 * @throws IllegalArgumentException An error will be thrown when the parameter "request" is null.
 	 */
 	public ActorResponse syncInvoke(ActorRequest request, long timeout) throws IllegalArgumentException {
 		// Parameter verification
@@ -235,7 +235,7 @@ public class ActorInvoker {
 	 * @param request Actor request data object (not null).
 	 * @param callback Actor response callback object (not null).
 	 * @param timeout Response timeout milliseconds for command async mode only (optional, if set timeout to 0, it will use the command.timeout defined or 60000ms by default).
-	 * @throws IllegalArgumentException An error is thrown when the parameter "request" or "callback" is null.
+	 * @throws IllegalArgumentException An error will be thrown when the parameter "request" or "callback" is null.
 	 */
 	public void asyncInvoke(ActorRequest request, ActorResponseCallback callback, long timeout) throws IllegalArgumentException {
 		// Parameter verification

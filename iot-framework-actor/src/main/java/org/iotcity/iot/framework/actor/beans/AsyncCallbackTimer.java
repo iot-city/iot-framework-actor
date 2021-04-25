@@ -88,7 +88,7 @@ public final class AsyncCallbackTimer implements AsyncCallback {
 	 * @param commandInfo The command information object (not null).
 	 * @param callback Actor response callback object (can not be null).
 	 * @param timeout Waiting for response timeout milliseconds (60,000ms by default).
-	 * @throws IllegalArgumentException An error is thrown when one of the parameters "request", "commandInfo" or "callback" is null.
+	 * @throws IllegalArgumentException An error will be thrown when one of the parameters "request", "commandInfo" or "callback" is null.
 	 */
 	public AsyncCallbackTimer(ActorRequest request, CommandInfo commandInfo, ActorResponseCallback callback, long timeout) throws IllegalArgumentException {
 		if (request == null || commandInfo == null || callback == null) throw new IllegalArgumentException("Parameter request, commandInfo or callback can not be null!");
