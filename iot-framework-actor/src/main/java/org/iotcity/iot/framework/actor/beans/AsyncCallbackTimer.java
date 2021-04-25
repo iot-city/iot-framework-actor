@@ -19,9 +19,9 @@ public final class AsyncCallbackTimer implements AsyncCallback {
 	 */
 	private final ActorRequest request;
 	/**
-	 * The command context.
+	 * The command information object (not null).
 	 */
-	private final CommandContext command;
+	private final CommandInfo commandInfo;
 	/**
 	 * Response lock object.
 	 */
@@ -85,15 +85,16 @@ public final class AsyncCallbackTimer implements AsyncCallback {
 	/**
 	 * Constructor for asynchronous callback timer for asynchronous invoking from remote.
 	 * @param request Actor request data object (not null).
-	 * @param command The command context.
+	 * @param commandInfo The command information object (not null).
 	 * @param callback Actor response callback object (can not be null).
 	 * @param timeout Waiting for response timeout milliseconds (60,000ms by default).
-	 * @throws IllegalArgumentException An error is thrown when one of the parameters "request", "command" or "callback" is null.
+	 * @throws IllegalArgumentException An error is thrown when one of the parameters "request", "commandInfo" or "callback" is null.
 	 */
-	public AsyncCallbackTimer(ActorRequest request, CommandContext command, ActorResponseCallback callback, long timeout) throws IllegalArgumentException {
-		if (request == null || command == null || callback == null) throw new IllegalArgumentException("Parameter request, command or callback can not be null!");
+	public AsyncCallbackTimer(ActorRequest request, CommandInfo commandInfo, ActorResponseCallback callback, long timeout) throws IllegalArgumentException {
+		if (request == null || commandInfo == null || callback == null) throw new IllegalArgumentException("Parameter request, commandInfo or callback can not be null!");
+		CommandContext command = commandInfo.getCommand();
 		this.request = request;
-		this.command = command;
+		this.commandInfo = commandInfo;
 		if (timeout <= 0) timeout = command.timeout;
 		this.timeout = timeout <= 0 ? 60000 : timeout;
 		this.taskHandler = command.actor.module.app.getTaskHandler();
@@ -128,6 +129,16 @@ public final class AsyncCallbackTimer implements AsyncCallback {
 	}
 
 	// --------------------------- Override methods ----------------------------
+
+	@Override
+	public ActorRequest getRequest() {
+		return request;
+	}
+
+	@Override
+	public CommandInfo getCommandInfo() {
+		return commandInfo;
+	}
 
 	@Override
 	public boolean isTimeout() {
@@ -170,6 +181,7 @@ public final class AsyncCallbackTimer implements AsyncCallback {
 
 		// Get response data
 		Serializable data = response.getData();
+		CommandContext command = commandInfo.getCommand();
 		// Check for async data type
 		if (data != null && !(command.asyncDataType.isInstance(data))) {
 

@@ -205,7 +205,7 @@ public class ActorInvoker {
 		// Whether the method run in asynchronous mode
 		if (command.async) {
 			// Create callback object
-			asyncCallback = new AsyncCallbackLocker(request, command, timeout);
+			asyncCallback = new AsyncCallbackLocker(request, info, timeout);
 			// Set callback to thread local
 			ActorThreadLocal.setAsyncCallback(asyncCallback);
 		}
@@ -357,7 +357,7 @@ public class ActorInvoker {
 		// Whether the method run in asynchronous mode
 		if (command.async) {
 			// Create callback object
-			asyncCallback = new AsyncCallbackTimer(request, command, callback, timeout);
+			asyncCallback = new AsyncCallbackTimer(request, info, callback, timeout);
 			// Set callback to thread local
 			ActorThreadLocal.setAsyncCallback(asyncCallback);
 		}

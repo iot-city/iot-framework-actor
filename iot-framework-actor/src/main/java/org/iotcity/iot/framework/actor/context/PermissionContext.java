@@ -40,7 +40,7 @@ public final class PermissionContext {
 	 * @return Permission values.
 	 */
 	public Integer[] values() {
-		return pvalues.toArray(new Integer[0]);
+		return pvalues.toArray(new Integer[pvalues.size()]);
 	}
 
 	/**
@@ -85,7 +85,7 @@ public final class PermissionContext {
 
 	@Override
 	public String toString() {
-		return JavaHelper.getArrayPreview(pvalues.toArray(new Integer[0]), false);
+		return JavaHelper.getArrayPreview(pvalues.toArray(new Integer[pvalues.size()]), false);
 	}
 
 }

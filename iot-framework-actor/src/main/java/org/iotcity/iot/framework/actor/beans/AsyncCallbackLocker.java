@@ -18,9 +18,9 @@ public final class AsyncCallbackLocker implements AsyncCallback {
 	 */
 	private final ActorRequest request;
 	/**
-	 * The command context.
+	 * The command information object (not null).
 	 */
-	private final CommandContext command;
+	private final CommandInfo commandInfo;
 	/**
 	 * Response lock object.
 	 */
@@ -55,16 +55,16 @@ public final class AsyncCallbackLocker implements AsyncCallback {
 	/**
 	 * Constructor for asynchronous callback lock handler.
 	 * @param request Actor request data object (not null).
-	 * @param command The command context (not null).
+	 * @param commandInfo The command information object (not null).
 	 * @param timeout Response timeout milliseconds (60,000ms by default).
-	 * @throws IllegalArgumentException An error is thrown when the parameter "request" or "command" is null.
+	 * @throws IllegalArgumentException An error is thrown when the parameter "request" or "info" is null.
 	 */
-	public AsyncCallbackLocker(ActorRequest request, CommandContext command, long timeout) throws IllegalArgumentException {
-		if (request == null || command == null) throw new IllegalArgumentException("Parameter request or command can not be null!");
+	public AsyncCallbackLocker(ActorRequest request, CommandInfo commandInfo, long timeout) throws IllegalArgumentException {
+		if (request == null || commandInfo == null) throw new IllegalArgumentException("Parameter request or commandInfo can not be null!");
 		this.request = request;
-		if (timeout <= 0) timeout = command.timeout;
+		this.commandInfo = commandInfo;
+		if (timeout <= 0) timeout = commandInfo.getCommand().timeout;
 		this.timeout = timeout <= 0 ? 60000 : timeout;
-		this.command = command;
 	}
 
 	// --------------------------- Public methods ----------------------------
@@ -112,6 +112,16 @@ public final class AsyncCallbackLocker implements AsyncCallback {
 	// --------------------------- Override methods ----------------------------
 
 	@Override
+	public ActorRequest getRequest() {
+		return request;
+	}
+
+	@Override
+	public CommandInfo getCommandInfo() {
+		return commandInfo;
+	}
+
+	@Override
 	public boolean isTimeout() {
 		return hasTimeout;
 	}
@@ -150,6 +160,8 @@ public final class AsyncCallbackLocker implements AsyncCallback {
 
 		// Get response data
 		Serializable data = response.getData();
+		// Get command context
+		CommandContext command = commandInfo.getCommand();
 		// Check for async data type
 		if (data != null && !(command.asyncDataType.isInstance(data))) {
 			// Get user message

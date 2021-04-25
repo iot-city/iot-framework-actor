@@ -7,6 +7,18 @@ package org.iotcity.iot.framework.actor.beans;
 public interface AsyncCallback {
 
 	/**
+	 * Gets the actor request object when calling method (returns not null).
+	 * @return The actor request object.
+	 */
+	ActorRequest getRequest();
+
+	/**
+	 * Gets the command information object when calling method (returns not null).
+	 * @return The command information object.
+	 */
+	CommandInfo getCommandInfo();
+
+	/**
 	 * Whether waiting for response has timed out.
 	 * @return Whether has time out.
 	 */
