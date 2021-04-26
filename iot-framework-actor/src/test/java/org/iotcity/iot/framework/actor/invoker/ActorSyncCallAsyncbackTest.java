@@ -1,5 +1,6 @@
 package org.iotcity.iot.framework.actor.invoker;
 
+import org.iotcity.iot.framework.IoTFramework;
 import org.iotcity.iot.framework.actor.ActorConfigure;
 import org.iotcity.iot.framework.actor.ActorInvoker;
 import org.iotcity.iot.framework.actor.ActorManager;
@@ -23,6 +24,7 @@ public class ActorSyncCallAsyncbackTest extends TestCase {
 	 * test invoker
 	 */
 	public void testInvoker() {
+		IoTFramework.init();
 		ActorManager manager = new ActorManager();
 
 		ActorConfigure configure = new ActorConfigure();
