@@ -12,6 +12,7 @@ import org.iotcity.iot.framework.actor.beans.ActorRequestData;
 import org.iotcity.iot.framework.actor.beans.ActorResponse;
 import org.iotcity.iot.framework.actor.beans.CommandInfo;
 import org.iotcity.iot.framework.actor.context.PermissionContext;
+import org.iotcity.iot.framework.core.config.PropertiesConfigFile;
 import org.iotcity.iot.framework.core.logging.Logger;
 import org.iotcity.iot.framework.core.util.helper.ConvertHelper;
 
@@ -30,8 +31,14 @@ public class ActorPermissionTest extends TestCase {
 	 */
 	public void testInvoker() {
 		ActorManager manager = new ActorManager();
-		ActorConfigure configure = new ActorConfigure("org/iotcity/iot/framework/actor/iot-actor-template.properties", true);
+
+		ActorConfigure configure = new ActorConfigure();
+		PropertiesConfigFile file = new PropertiesConfigFile();
+		file.file = "org/iotcity/iot/framework/actor/iot-actor-template.properties";
+		file.fromPackage = true;
+		configure.load(file);
 		configure.config(manager, true);
+
 		ActorInvokerOptions options = new ActorInvokerOptions();
 		options.authorizer = new ActorAuthorizer() {
 

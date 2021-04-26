@@ -18,6 +18,7 @@ import org.iotcity.iot.framework.actor.context.PermissionContext;
 import org.iotcity.iot.framework.core.annotation.AnnotationAnalyzer;
 import org.iotcity.iot.framework.core.annotation.AnnotationParser;
 import org.iotcity.iot.framework.core.config.Configurable;
+import org.iotcity.iot.framework.core.config.PropertiesConfigFile;
 import org.iotcity.iot.framework.core.config.PropertiesConfigure;
 import org.iotcity.iot.framework.core.i18n.LocaleText;
 import org.iotcity.iot.framework.core.logging.Logger;
@@ -26,45 +27,31 @@ import org.iotcity.iot.framework.core.util.helper.StringHelper;
 import org.iotcity.iot.framework.core.util.task.TaskHandler;
 
 /**
- * Manage actor annotations by using properties file in this action configure.
+ * Manage actor application annotations by using properties file in this action configure.<br/>
+ * The default external file to load: "framework-actor.properties".
  * @author Ardon
  */
 public class ActorConfigure extends PropertiesConfigure<ApplicationContext[]> {
 
-	// --------------------------- Constructor ----------------------------
-
-	/**
-	 * Constructor for automatic properties configuration object.<br/>
-	 * <b>(Actor configure template file: "org/iotcity/iot/framework/actor/iot-actor-template.properties")</b>
-	 * @param configFile The configure properties file to load (required, not null or empty).
-	 * @param fromPackage Whether load the file from package.
-	 * @throws IllegalArgumentException An error will be thrown when the parameter "configFile" is null.
-	 */
-	public ActorConfigure(String configFile, boolean fromPackage) {
-		super(configFile, fromPackage);
-	}
-
-	/**
-	 * Constructor for automatic properties configuration object.<br/>
-	 * <b>(Actor configure template file: "org/iotcity/iot/framework/actor/iot-actor-template.properties")</b>
-	 * @param configFile The configure properties file to load (required, not null or empty).
-	 * @param encoding Text encoding (optional, e.g. "UTF-8", if it is set to null, it will be judged automatically).
-	 * @param fromPackage Whether load the file from package.
-	 * @throws IllegalArgumentException An error will be thrown when the parameter "configFile" is null.
-	 */
-	public ActorConfigure(String configFile, String encoding, boolean fromPackage) {
-		super(configFile, encoding, fromPackage);
-	}
-
 	// --------------------------- Public Methods ----------------------------
+
+	@Override
+	public String getPrefixKey() {
+		return "iot.framework.actor.apps";
+	}
+
+	@Override
+	public PropertiesConfigFile getDefaultExternalFile() {
+		return new PropertiesConfigFile("framework-actor.properties", "UTF-8", false);
+	}
 
 	@Override
 	public boolean config(Configurable<ApplicationContext[]> configurable, boolean reset) {
 		// Verify configurable object class
-		if (configurable == null || !(configurable instanceof ActorManager)) return false;
+		if (configurable == null || props == null || !(configurable instanceof ActorManager)) return false;
 
 		// Get application configures
-		ApplicationConfig[] configs = PropertiesLoader.getConfigArray(ApplicationConfig.class, props, "iot.framework.actor.apps");
+		ApplicationConfig[] configs = PropertiesLoader.getConfigArray(ApplicationConfig.class, props, this.getPrefixKey());
 		if (configs == null || configs.length == 0) return false;
 
 		// Create list
@@ -79,7 +66,7 @@ public class ActorConfigure extends PropertiesConfigure<ApplicationContext[]> {
 			// Get pool configure
 			ApplicationConfigPool pool = config.pool;
 			if (pool == null) {
-				taskHandler = TaskHandler.instance;
+				taskHandler = TaskHandler.getDefaultHandler();
 			} else {
 				taskHandler = new TaskHandler(config.appID, pool.corePoolSize, pool.maximumPoolSize, pool.keepAliveTime, pool.capacity);
 			}
@@ -147,7 +134,7 @@ public class ActorConfigure extends PropertiesConfigure<ApplicationContext[]> {
 		@Override
 		public final void parse(Class<?> clazz) {
 			// System.out.println(">>>>>>>>>>>>: " + clazz.getName());
-			if (!clazz.isAnnotationPresent(Actor.class)) return;
+			if (clazz.isInterface() || !clazz.isAnnotationPresent(Actor.class)) return;
 
 			// Get actor annotation
 			Actor actor = clazz.getAnnotation(Actor.class);

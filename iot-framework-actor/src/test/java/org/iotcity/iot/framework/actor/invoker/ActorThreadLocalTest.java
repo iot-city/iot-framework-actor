@@ -8,6 +8,7 @@ import org.iotcity.iot.framework.actor.beans.ActorRequest;
 import org.iotcity.iot.framework.actor.beans.ActorRequestData;
 import org.iotcity.iot.framework.actor.beans.ActorResponse;
 import org.iotcity.iot.framework.actor.beans.ActorResponseCallback;
+import org.iotcity.iot.framework.core.config.PropertiesConfigFile;
 import org.iotcity.iot.framework.core.logging.Logger;
 import org.iotcity.iot.framework.core.util.task.TaskHandler;
 
@@ -26,12 +27,18 @@ public class ActorThreadLocalTest extends TestCase {
 	 */
 	public void testInvoker() {
 		ActorManager manager = new ActorManager();
-		ActorConfigure configure = new ActorConfigure("org/iotcity/iot/framework/actor/iot-actor-template.properties", true);
+
+		ActorConfigure configure = new ActorConfigure();
+		PropertiesConfigFile file = new PropertiesConfigFile();
+		file.file = "org/iotcity/iot/framework/actor/iot-actor-template.properties";
+		file.fromPackage = true;
+		configure.load(file);
 		configure.config(manager, true);
+
 		// Create invoker
 		ActorInvoker invoker = new ActorInvoker(manager);
 		// Run task one
-		TaskHandler.instance.run(new Runnable() {
+		TaskHandler.getDefaultHandler().run(new Runnable() {
 
 			@Override
 			public void run() {
@@ -48,7 +55,7 @@ public class ActorThreadLocalTest extends TestCase {
 
 		});
 		// Run task two
-		TaskHandler.instance.add(new Runnable() {
+		TaskHandler.getDefaultHandler().add(new Runnable() {
 
 			@Override
 			public void run() {

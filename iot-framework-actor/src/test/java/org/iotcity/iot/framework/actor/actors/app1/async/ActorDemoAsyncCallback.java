@@ -24,7 +24,7 @@ public class ActorDemoAsyncCallback {
 		logger.trace("Command \"async-callback\" receive: \"" + text + "\", wait for 1 seconds before callback.");
 		AsyncCallback callback = ActorThreadLocal.getAsyncCallback();
 		if (callback == null) return;
-		TaskHandler.instance.add(new Runnable() {
+		TaskHandler.getDefaultHandler().add(new Runnable() {
 
 			@Override
 			public void run() {
@@ -40,7 +40,7 @@ public class ActorDemoAsyncCallback {
 		logger.trace("Command \"async-callback-returns\" receive: " + data + ", wait for 1 seconds before callback.");
 		AsyncCallback callback = ActorThreadLocal.getAsyncCallback();
 		if (callback == null) return false;
-		return TaskHandler.instance.add(new Runnable() {
+		return TaskHandler.getDefaultHandler().add(new Runnable() {
 
 			@Override
 			public void run() {
@@ -68,7 +68,7 @@ public class ActorDemoAsyncCallback {
 		logger.trace("Command \"async-callback-timeout\" receive: " + data + ", the total timeout value is 5 seconds, there is no callback execution.");
 		AsyncCallback callback = ActorThreadLocal.getAsyncCallback();
 		if (callback == null) return false;
-		TaskHandler.instance.add(new Runnable() {
+		TaskHandler.getDefaultHandler().add(new Runnable() {
 
 			@Override
 			public void run() {
@@ -85,7 +85,7 @@ public class ActorDemoAsyncCallback {
 		logger.trace("Command \"async-callback-illegal-type\" receive: " + data + ", try to callback with an illegal type");
 		AsyncCallback callback = ActorThreadLocal.getAsyncCallback();
 		if (callback == null) return;
-		TaskHandler.instance.add(new Runnable() {
+		TaskHandler.getDefaultHandler().add(new Runnable() {
 
 			@Override
 			public void run() {

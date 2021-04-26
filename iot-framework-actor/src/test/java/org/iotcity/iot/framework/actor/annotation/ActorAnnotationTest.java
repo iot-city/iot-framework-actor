@@ -1,11 +1,13 @@
 package org.iotcity.iot.framework.actor.annotation;
 
+import org.iotcity.iot.framework.IoTFramework;
 import org.iotcity.iot.framework.actor.ActorConfigure;
 import org.iotcity.iot.framework.actor.ActorManager;
 import org.iotcity.iot.framework.actor.context.ActorContext;
 import org.iotcity.iot.framework.actor.context.ApplicationContext;
 import org.iotcity.iot.framework.actor.context.CommandContext;
 import org.iotcity.iot.framework.actor.context.ModuleContext;
+import org.iotcity.iot.framework.core.config.PropertiesConfigFile;
 
 import junit.framework.TestCase;
 
@@ -19,9 +21,16 @@ public class ActorAnnotationTest extends TestCase {
 	 * Test annotations
 	 */
 	public void testAnnotations() {
+		IoTFramework.init();
 		ActorManager manager = new ActorManager();
-		ActorConfigure configure = new ActorConfigure("org/iotcity/iot/framework/actor/iot-actor-template.properties", true);
+
+		ActorConfigure configure = new ActorConfigure();
+		PropertiesConfigFile file = new PropertiesConfigFile();
+		file.file = "org/iotcity/iot/framework/actor/iot-actor-template.properties";
+		file.fromPackage = true;
+		configure.load(file);
 		configure.config(manager, true);
+
 		ApplicationContext[] apps = manager.getApplications();
 		for (ApplicationContext app : apps) {
 			System.out.println("============================= APP (" + app.appID + ") ==============================");

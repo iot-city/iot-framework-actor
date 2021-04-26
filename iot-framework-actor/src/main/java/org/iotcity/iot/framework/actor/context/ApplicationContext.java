@@ -66,7 +66,7 @@ public final class ApplicationContext {
 			throw new IllegalArgumentException("Parameter manager, appID can not be null or empty!");
 		}
 		this.manager = manager;
-		this.taskHandler = taskHandler == null ? TaskHandler.instance : taskHandler;
+		this.taskHandler = taskHandler == null ? TaskHandler.getDefaultHandler() : taskHandler;
 		this.appID = appID;
 		this.version = ActorManager.fixAppVersion(version);
 		this.enabled = enabled;

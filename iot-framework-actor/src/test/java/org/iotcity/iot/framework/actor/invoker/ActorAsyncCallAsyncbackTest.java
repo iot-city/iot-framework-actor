@@ -9,6 +9,7 @@ import org.iotcity.iot.framework.actor.beans.ActorRequestData;
 import org.iotcity.iot.framework.actor.beans.ActorResponse;
 import org.iotcity.iot.framework.actor.beans.ActorResponseCallback;
 import org.iotcity.iot.framework.actor.beans.ActorResponseStatus;
+import org.iotcity.iot.framework.core.config.PropertiesConfigFile;
 import org.iotcity.iot.framework.core.logging.Logger;
 
 import junit.framework.TestCase;
@@ -26,8 +27,14 @@ public class ActorAsyncCallAsyncbackTest extends TestCase {
 	 */
 	public void testInvoker() {
 		ActorManager manager = new ActorManager();
-		ActorConfigure configure = new ActorConfigure("org/iotcity/iot/framework/actor/iot-actor-template.properties", true);
+
+		ActorConfigure configure = new ActorConfigure();
+		PropertiesConfigFile file = new PropertiesConfigFile();
+		file.file = "org/iotcity/iot/framework/actor/iot-actor-template.properties";
+		file.fromPackage = true;
+		configure.load(file);
 		configure.config(manager, true);
+
 		// Create invoker
 		ActorInvoker invoker = new ActorInvoker(manager);
 		// Set request language keys

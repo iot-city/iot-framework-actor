@@ -1,7 +1,6 @@
 package org.iotcity.iot.framework.actor;
 
 import org.iotcity.iot.framework.IoTFramework;
-import org.iotcity.iot.framework.core.i18n.LocaleConfigure;
 import org.iotcity.iot.framework.core.i18n.LocaleText;
 import org.iotcity.iot.framework.core.logging.Logger;
 
@@ -14,29 +13,22 @@ public final class FrameworkActor {
 	// --------------------------- Private static fields ----------------------------
 
 	/**
-	 * The logger configure name.
+	 * The framework actor name.
 	 */
-	private static final String LOGGER_NAME = "ACTOR";
+	private static final String ACTOR_NAME = "ACTOR";
 	/**
-	 * The locale configure name.
+	 * The global actor manager of framework
 	 */
-	private static final String LOCALE_NAME = "ACTOR";
-
-	// --------------------------- Default static block ----------------------------
-
-	static {
-		// Do configure
-		config();
-	}
+	private static final ActorManager actorManager = new ActorManager();
 
 	// --------------------------- Public static methods ----------------------------
 
 	/**
-	 * Configure or reconfigure locale data.
+	 * Gets the global actor manager of framework (returns not null).
+	 * @return An global actor manager to manage applications.
 	 */
-	public static final void config() {
-		// Configure the locale text
-		new LocaleConfigure("org/iotcity/iot/framework/actor/resources/i18n-actor-config.properties", true).config(IoTFramework.getLocaleFactory(), false);
+	public static final ActorManager getGlobalActorManager() {
+		return actorManager;
 	}
 
 	/**
@@ -44,7 +36,7 @@ public final class FrameworkActor {
 	 * @return A logger to log message (not null).
 	 */
 	public static final Logger getLogger() {
-		return IoTFramework.getLoggerFactory().getLogger(LOGGER_NAME);
+		return IoTFramework.getLoggerFactory().getLogger(ACTOR_NAME);
 	}
 
 	/**
@@ -52,7 +44,7 @@ public final class FrameworkActor {
 	 * @return A locale text object (not null).
 	 */
 	public static final LocaleText getLocale() {
-		return IoTFramework.getLocaleFactory().getLocale(LOCALE_NAME);
+		return IoTFramework.getLocaleFactory().getLocale(ACTOR_NAME);
 	}
 
 	/**
@@ -61,7 +53,7 @@ public final class FrameworkActor {
 	 * @return Locale text object (not null).
 	 */
 	public static final LocaleText getLocale(String lang) {
-		return IoTFramework.getLocaleFactory().getLocale(LOCALE_NAME, lang);
+		return IoTFramework.getLocaleFactory().getLocale(ACTOR_NAME, lang);
 	}
 
 	/**
@@ -70,7 +62,7 @@ public final class FrameworkActor {
 	 * @return Locale text object (not null).
 	 */
 	public static final LocaleText getLocale(String[] langs) {
-		return IoTFramework.getLocaleFactory().getLocale(LOCALE_NAME, langs);
+		return IoTFramework.getLocaleFactory().getLocale(ACTOR_NAME, langs);
 	}
 
 }
