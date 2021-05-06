@@ -53,7 +53,7 @@ public class ActorFactoryTest extends TestCase {
 				case 1:
 					// Test factory default creation case.
 					try {
-						return info.getActor().actorClass.newInstance();
+						return info.getActor().actorClass.getDeclaredConstructor().newInstance();
 					} catch (Exception e) {
 						e.printStackTrace();
 					}

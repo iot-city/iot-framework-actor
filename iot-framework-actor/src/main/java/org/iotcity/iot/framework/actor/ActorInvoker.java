@@ -177,7 +177,7 @@ public class ActorInvoker {
 		// Create an actor object
 		Object actor;
 		try {
-			actor = factory == null ? actorClass.newInstance() : factory.getInstance(request, info);
+			actor = factory == null ? actorClass.getDeclaredConstructor().newInstance() : factory.getInstance(request, info);
 		} catch (Exception e) {
 
 			// Get message
@@ -325,7 +325,7 @@ public class ActorInvoker {
 		// Create an actor object
 		Object actor;
 		try {
-			actor = factory == null ? actorClass.newInstance() : factory.getInstance(request, info);
+			actor = factory == null ? actorClass.getDeclaredConstructor().newInstance() : factory.getInstance(request, info);
 		} catch (Exception e) {
 
 			// Get message
