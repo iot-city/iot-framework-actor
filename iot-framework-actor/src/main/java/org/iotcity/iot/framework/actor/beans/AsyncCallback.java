@@ -20,13 +20,13 @@ public interface AsyncCallback {
 
 	/**
 	 * Whether waiting for response has timed out.
-	 * @return Whether has time out.
+	 * @return Returns true if has time out; otherwise, returns false.
 	 */
 	boolean isTimeout();
 
 	/**
 	 * Whether the response data callback been executed.
-	 * @return Whether callback been executed.
+	 * @return Returns true if callback been executed; otherwise, returns false.
 	 */
 	boolean hasCallback();
 

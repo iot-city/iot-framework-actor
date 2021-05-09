@@ -12,7 +12,7 @@ public interface ActorAuthorizer {
 	 * Permission verification processing before calling the command method.
 	 * @param request The request data object (not null).
 	 * @param info The command information in method runtime (not null).
-	 * @return Whether pass the permission verification.
+	 * @return Returns true if pass the permission verification; otherwise, returns false.
 	 * @throws ActorError You can throw a custom verification failure message through the <b>{@link ActorError }</b> exception.
 	 */
 	boolean verifyPermission(ActorRequest request, CommandInfo info) throws ActorError;
