@@ -52,11 +52,7 @@ public class ActorFactoryTest extends TestCase {
 					return null;
 				case 1:
 					// Test factory default creation case.
-					try {
-						return info.getActor().actorClass.getDeclaredConstructor().newInstance();
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
+					return IoTFramework.getGlobalInstanceFactory().getInstance(info.getActor().actorClass);
 				case 2:
 					// Test factory throws an ActorError exception.
 					throw new ActorError("I don't want to create it!!!!!!!!!!");

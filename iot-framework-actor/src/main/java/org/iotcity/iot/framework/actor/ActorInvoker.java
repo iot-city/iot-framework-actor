@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import org.iotcity.iot.framework.IoTFramework;
 import org.iotcity.iot.framework.actor.beans.ActorAuthorizer;
 import org.iotcity.iot.framework.actor.beans.ActorError;
 import org.iotcity.iot.framework.actor.beans.ActorFactory;
@@ -36,7 +37,7 @@ public class ActorInvoker {
 	 */
 	protected final ActorManager manager;
 	/**
-	 * Create an actor for business logic factory (optional, it can be set to null when using <b>new</b> to create an instance).
+	 * Actor factory for actor instance creation (optional, it can be set to null value when using {@link IoTFramework }.getGlobalInstanceFactory() to create an instance).
 	 */
 	protected final ActorFactory factory;
 	/**
@@ -177,7 +178,7 @@ public class ActorInvoker {
 		// Create an actor object
 		Object actor;
 		try {
-			actor = factory == null ? actorClass.getDeclaredConstructor().newInstance() : factory.getInstance(request, info);
+			actor = factory == null ? IoTFramework.getGlobalInstanceFactory().getInstance(actorClass) : factory.getInstance(request, info);
 		} catch (Exception e) {
 
 			// Get message
@@ -325,7 +326,7 @@ public class ActorInvoker {
 		// Create an actor object
 		Object actor;
 		try {
-			actor = factory == null ? actorClass.getDeclaredConstructor().newInstance() : factory.getInstance(request, info);
+			actor = factory == null ? IoTFramework.getGlobalInstanceFactory().getInstance(actorClass) : factory.getInstance(request, info);
 		} catch (Exception e) {
 
 			// Get message

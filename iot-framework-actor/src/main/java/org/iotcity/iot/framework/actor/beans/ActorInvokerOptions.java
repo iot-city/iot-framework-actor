@@ -1,5 +1,6 @@
 package org.iotcity.iot.framework.actor.beans;
 
+import org.iotcity.iot.framework.IoTFramework;
 import org.iotcity.iot.framework.core.i18n.LocaleText;
 import org.iotcity.iot.framework.core.logging.Logger;
 
@@ -11,7 +12,7 @@ import org.iotcity.iot.framework.core.logging.Logger;
 public class ActorInvokerOptions {
 
 	/**
-	 * Create an actor for business logic factory (optional, it can be set to null when using <b>new</b> to create an instance).
+	 * Actor factory for actor instance creation (optional, it can be set to null value when using {@link IoTFramework }.getGlobalInstanceFactory() to create an instance).
 	 */
 	public ActorFactory factory;
 	/**
