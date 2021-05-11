@@ -39,19 +39,19 @@ public class ActorInvoker {
 	/**
 	 * Actor factory for actor instance creation (optional, it can be set to null value when using {@link IoTFramework }.getGlobalInstanceFactory() to create an instance).
 	 */
-	protected final ActorFactory factory;
+	protected ActorFactory factory;
 	/**
 	 * The actor authorizer for permission verification (optional, Set to null when permission verification is not required).
 	 */
-	protected final ActorAuthorizer authorizer;
+	protected ActorAuthorizer authorizer;
 	/**
 	 * The system logger from manager.
 	 */
-	protected final Logger logger;
+	protected Logger logger;
 	/**
 	 * Actor default locale language text object.
 	 */
-	protected final LocaleText locale;
+	protected LocaleText locale;
 
 	// ---------------------------------- Constructor ----------------------------------
 
@@ -73,6 +73,24 @@ public class ActorInvoker {
 	public ActorInvoker(ActorManager manager, ActorInvokerOptions options) throws IllegalArgumentException {
 		if (manager == null) throw new IllegalArgumentException("Parameter manager can not be null!");
 		this.manager = manager;
+		this.setOptions(options);
+	}
+
+	// ---------------------------------- Public options method ----------------------------------
+
+	/**
+	 * Gets the actor manager of this invoker (returns not null).
+	 * @return Actor manager to manage applications.
+	 */
+	public final ActorManager getManager() {
+		return manager;
+	}
+
+	/**
+	 * Set invoker options.
+	 * @param options The invoker options, you can set actor factory, authorizer, logger or locale in this options (optional, it can be set to null when using the default configure).
+	 */
+	public void setOptions(ActorInvokerOptions options) {
 		if (options != null) {
 			this.factory = options.factory;
 			this.authorizer = options.authorizer;

@@ -31,8 +31,7 @@ public class ActorSyncCallAsyncbackTest extends TestCase {
 		PropertiesConfigFile file = new PropertiesConfigFile();
 		file.file = "org/iotcity/iot/framework/actor/iot-actor-template.properties";
 		file.fromPackage = true;
-		configure.load(file);
-		configure.config(manager, true);
+		configure.config(file, manager, true);
 
 		// Create invoker
 		ActorInvoker invoker = new ActorInvoker(manager);

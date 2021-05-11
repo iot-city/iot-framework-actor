@@ -37,8 +37,7 @@ public class ActorFactoryTest extends TestCase {
 		PropertiesConfigFile file = new PropertiesConfigFile();
 		file.file = "org/iotcity/iot/framework/actor/iot-actor-template.properties";
 		file.fromPackage = true;
-		configure.load(file);
-		configure.config(manager, true);
+		configure.config(file, manager, true);
 
 		ActorInvokerOptions options = new ActorInvokerOptions();
 		options.factory = new ActorFactory() {

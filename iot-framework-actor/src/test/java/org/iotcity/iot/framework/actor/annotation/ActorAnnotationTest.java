@@ -28,8 +28,7 @@ public class ActorAnnotationTest extends TestCase {
 		PropertiesConfigFile file = new PropertiesConfigFile();
 		file.file = "org/iotcity/iot/framework/actor/iot-actor-template.properties";
 		file.fromPackage = true;
-		configure.load(file);
-		configure.config(manager, true);
+		configure.config(file, manager, true);
 
 		ApplicationContext[] apps = manager.getApplications();
 		for (ApplicationContext app : apps) {

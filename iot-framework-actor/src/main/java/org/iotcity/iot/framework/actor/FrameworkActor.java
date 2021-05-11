@@ -17,9 +17,13 @@ public final class FrameworkActor {
 	 */
 	private static final String ACTOR_NAME = "ACTOR";
 	/**
-	 * The global actor manager of framework
+	 * The global actor manager of framework.
 	 */
 	private static final ActorManager actorManager = new ActorManager();
+	/**
+	 * The global actor invoker of framework.
+	 */
+	private static final ActorInvoker actorInvoker = new ActorInvoker(actorManager);
 
 	// --------------------------- Public static methods ----------------------------
 
@@ -29,6 +33,14 @@ public final class FrameworkActor {
 	 */
 	public static final ActorManager getGlobalActorManager() {
 		return actorManager;
+	}
+
+	/**
+	 * Gets the global actor invoker of framework (returns not null).
+	 * @return An global actor invoker for actor request invoking.
+	 */
+	public static final ActorInvoker getGlobalActorInvoker() {
+		return actorInvoker;
 	}
 
 	/**
