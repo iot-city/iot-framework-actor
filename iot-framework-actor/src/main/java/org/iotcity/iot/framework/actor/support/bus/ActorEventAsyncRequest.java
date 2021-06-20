@@ -8,7 +8,7 @@ import org.iotcity.iot.framework.actor.beans.ActorResponseCallback;
  * @author ardon
  * @date 2021-05-12
  */
-public class ActorAsyncEventRequest {
+public class ActorEventAsyncRequest {
 
 	/**
 	 * Actor request data object (not null).
@@ -29,7 +29,7 @@ public class ActorAsyncEventRequest {
 	 * @param callback Actor response callback object (not null).
 	 * @throws IllegalArgumentException An error will be thrown when the parameter "request" or "callback" is null.
 	 */
-	public ActorAsyncEventRequest(ActorRequest request, ActorResponseCallback callback) {
+	public ActorEventAsyncRequest(ActorRequest request, ActorResponseCallback callback) {
 		this(request, callback, 0);
 	}
 
@@ -40,7 +40,7 @@ public class ActorAsyncEventRequest {
 	 * @param timeout Response timeout milliseconds for command async mode only (optional, if set timeout to 0, it will use the command.timeout defined or 60000ms by default).
 	 * @throws IllegalArgumentException An error will be thrown when the parameter "request" or "callback" is null.
 	 */
-	public ActorAsyncEventRequest(ActorRequest request, ActorResponseCallback callback, long timeout) {
+	public ActorEventAsyncRequest(ActorRequest request, ActorResponseCallback callback, long timeout) {
 		if (request == null || callback == null) throw new IllegalArgumentException("Parameter request and callback can not be null!");
 		this.request = request;
 		this.callback = callback;

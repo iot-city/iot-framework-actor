@@ -34,7 +34,7 @@ public class ActorBusEventTest extends TestCase {
 
 		// Publish event:
 		ActorRequest request = new ActorRequestData(null, "DemoApp1", "1.0.0", "SYNC-RETURN", "TestThreadLocal", "get-local-one", 1);
-		ActorSyncEventRequest syncData = new ActorSyncEventRequest(request);
+		ActorEventSyncRequest syncData = new ActorEventSyncRequest(request);
 		IoTFramework.getBusEventPublisher().publish(new BusEvent(this, syncData));
 		// Get response:
 		ActorResponse response = syncData.getResponse();
@@ -43,7 +43,7 @@ public class ActorBusEventTest extends TestCase {
 		logger.info("----------------------------- TEST ACTOR ASYNC EVENT -----------------------------");
 
 		// Publish event:
-		ActorAsyncEventRequest asyncData = new ActorAsyncEventRequest(request, new ActorResponseCallback() {
+		ActorEventAsyncRequest asyncData = new ActorEventAsyncRequest(request, new ActorResponseCallback() {
 
 			@Override
 			public void callback(ActorResponse response) {

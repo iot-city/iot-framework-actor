@@ -8,7 +8,7 @@ import org.iotcity.iot.framework.actor.beans.ActorResponse;
  * @author ardon
  * @date 2021-05-12
  */
-public class ActorSyncEventRequest {
+public class ActorEventSyncRequest {
 
 	/**
 	 * Actor request data object (not null).
@@ -28,7 +28,7 @@ public class ActorSyncEventRequest {
 	 * @param request Actor request data object (not null).
 	 * @throws IllegalArgumentException An error will be thrown when the parameter "request" is null.
 	 */
-	public ActorSyncEventRequest(ActorRequest request) {
+	public ActorEventSyncRequest(ActorRequest request) {
 		this(request, 0);
 	}
 
@@ -38,7 +38,7 @@ public class ActorSyncEventRequest {
 	 * @param timeout Response timeout milliseconds for command async mode only (optional, if set timeout to 0, it will use the command.timeout defined or 60000ms by default).
 	 * @throws IllegalArgumentException An error will be thrown when the parameter "request" is null.
 	 */
-	public ActorSyncEventRequest(ActorRequest request, long timeout) {
+	public ActorEventSyncRequest(ActorRequest request, long timeout) {
 		if (request == null) throw new IllegalArgumentException("Parameter request can not be null!");
 		this.request = request;
 		this.timeout = timeout;

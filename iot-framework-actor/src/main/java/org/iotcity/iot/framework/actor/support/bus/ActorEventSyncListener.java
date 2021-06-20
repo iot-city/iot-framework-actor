@@ -7,18 +7,18 @@ import org.iotcity.iot.framework.core.bus.BusEvent;
 import org.iotcity.iot.framework.core.bus.BusEventListener;
 
 /**
- * Actor asynchronous event listener for framework bus event publishing.
+ * Actor synchronous event listener for framework bus event publishing.
  * @author ardon
  * @date 2021-05-12
  */
-@BusDataListener(ActorAsyncEventRequest.class)
-public class ActorAsyncEventListener implements BusEventListener {
+@BusDataListener(ActorEventSyncRequest.class)
+public class ActorEventSyncListener implements BusEventListener {
 
 	@Override
 	public boolean onEvent(BusEvent event) {
-		ActorAsyncEventRequest data = event.getData();
+		ActorEventSyncRequest data = event.getData();
 		ActorInvoker invoker = FrameworkActor.getGlobalActorInvoker();
-		invoker.asyncInvoke(data.getRequest(), data.getCallback(), data.getTimeout());
+		data.setResponse(invoker.syncInvoke(data.getRequest(), data.getTimeout()));
 		return true;
 	}
 
