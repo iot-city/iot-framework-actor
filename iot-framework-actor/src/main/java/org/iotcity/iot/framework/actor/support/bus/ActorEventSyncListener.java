@@ -16,7 +16,7 @@ public class ActorEventSyncListener implements BusEventListener {
 
 	@Override
 	public boolean onEvent(BusEvent event) throws Exception {
-		ActorEventSyncRequest data = event.getData();
+		ActorEventSyncRequest data = event.getEventData();
 		ActorInvoker invoker = FrameworkActor.getGlobalActorInvoker();
 		data.setResponse(invoker.syncInvoke(data.getRequest(), data.getTimeout()));
 		return true;
