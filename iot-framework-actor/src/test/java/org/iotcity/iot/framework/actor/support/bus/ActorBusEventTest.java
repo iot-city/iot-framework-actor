@@ -35,7 +35,11 @@ public class ActorBusEventTest extends TestCase {
 		// Publish event:
 		ActorRequest request = new ActorRequestData(null, "DemoApp1", "1.0.0", "SYNC-RETURN", "TestThreadLocal", "get-local-one", 1);
 		ActorEventSyncRequest syncData = new ActorEventSyncRequest(request);
-		IoTFramework.getBusEventPublisher().publish(new BusEvent(this, syncData, false));
+		try {
+			IoTFramework.getBusEventPublisher().publish(new BusEvent(this, syncData, false));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		// Get response:
 		ActorResponse response = syncData.getResponse();
 		logger.info("Test for sync event response: " + response.toString());
@@ -52,7 +56,12 @@ public class ActorBusEventTest extends TestCase {
 			}
 
 		});
-		IoTFramework.getBusEventPublisher().publish(new BusEvent(this, asyncData, false));
+
+		try {
+			IoTFramework.getBusEventPublisher().publish(new BusEvent(this, asyncData, false));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 		logger.info("----------------------------- TEST ACTOR BUS EVENT COMPLETED -----------------------------");
 

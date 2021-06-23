@@ -15,7 +15,7 @@ import org.iotcity.iot.framework.core.bus.BusEventListener;
 public class ActorEventAsyncListener implements BusEventListener {
 
 	@Override
-	public boolean onEvent(BusEvent event) {
+	public boolean onEvent(BusEvent event) throws Exception {
 		ActorEventAsyncRequest data = event.getData();
 		ActorInvoker invoker = FrameworkActor.getGlobalActorInvoker();
 		invoker.asyncInvoke(data.getRequest(), data.getCallback(), data.getTimeout());
