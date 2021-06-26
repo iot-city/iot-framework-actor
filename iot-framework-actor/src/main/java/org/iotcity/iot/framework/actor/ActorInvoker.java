@@ -450,7 +450,7 @@ public class ActorInvoker {
 			String logMsg = locale.text("actor.invoke.logic.error", command.cmd, actor.getClass().getSimpleName(), method.getName(), e.getMessage());
 			if (e instanceof ActorError) {
 				logger.warn(logMsg);
-				return new ActorResponseData(ActorResponseStatus.LOGIC_FAILED, e.getMessage(), null, null);
+				return new ActorResponseData(ActorResponseStatus.LOGICAL_FAILED, e.getMessage(), null, null);
 			} else {
 				return getExceptionResponse(ActorResponseStatus.EXCEPTION, null, langs, logMsg, e);
 			}

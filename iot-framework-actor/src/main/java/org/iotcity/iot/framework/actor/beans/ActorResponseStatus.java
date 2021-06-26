@@ -6,13 +6,13 @@ package org.iotcity.iot.framework.actor.beans;
  */
 public enum ActorResponseStatus {
 	/**
-	 * The actor has accepted the request but has not yet processed it (asynchronous processing).
-	 */
-	ACCEPTED,
-	/**
 	 * Response success status.
 	 */
 	OK,
+	/**
+	 * The actor has accepted the request but has not yet processed it (asynchronous processing).
+	 */
+	ACCEPTED,
 	/**
 	 * The permission context does not authorize the current request.
 	 */
@@ -20,7 +20,7 @@ public enum ActorResponseStatus {
 	/**
 	 * Business logic execution failed.
 	 */
-	LOGIC_FAILED,
+	LOGICAL_FAILED,
 	/**
 	 * The actor encountered an unexpected condition, which made it unable to complete the processing of the request (an exception was thrown).
 	 */
