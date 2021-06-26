@@ -195,7 +195,6 @@ public final class AsyncCallbackLocker implements AsyncCallback {
 			// Set response data
 			this.response = response;
 			// Notify the waiting lock to continue
-			// Will set the locked value to false in getLock() method after release
 			if (locked) lock.notifyAll();
 		}
 	}
