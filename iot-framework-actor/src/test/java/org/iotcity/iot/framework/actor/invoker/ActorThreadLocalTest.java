@@ -56,7 +56,7 @@ public class ActorThreadLocalTest extends TestCase {
 
 		});
 		// Run task two
-		TaskHandler.getDefaultHandler().add(new Runnable() {
+		TaskHandler.getDefaultHandler().addDelayTask(new Runnable() {
 
 			@Override
 			public void run() {

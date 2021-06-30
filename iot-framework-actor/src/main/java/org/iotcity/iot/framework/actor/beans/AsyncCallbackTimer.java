@@ -115,7 +115,7 @@ public final class AsyncCallbackTimer implements AsyncCallback {
 			// Check progress status again in lock
 			if (timoutTaskID != 0 || hasCallbackResponse) return;
 			// Create a timer task
-			timoutTaskID = taskHandler.add(name, timeoutTask, timeout);
+			timoutTaskID = taskHandler.addDelayTask(name, timeoutTask, timeout);
 		}
 
 	}
@@ -169,7 +169,7 @@ public final class AsyncCallbackTimer implements AsyncCallback {
 			// Remove previous task
 			taskHandler.remove(timoutTaskID);
 			// Rebuild the timeout task
-			timoutTaskID = taskHandler.add(name, timeoutTask, this.timeout);
+			timoutTaskID = taskHandler.addDelayTask(name, timeoutTask, this.timeout);
 		}
 
 	}
