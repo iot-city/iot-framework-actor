@@ -134,8 +134,10 @@ public class ActorInvoker {
 
 		try {
 
+			// Get authorizer object.
+			ActorAuthorizer auth = authorizer;
 			// Permission verification
-			if (authorizer != null && !authorizer.verifyPermission(request, info)) {
+			if (auth != null && !auth.verifyPermission(request, info)) {
 
 				// Get the parameter values
 				String value = getParamValues(command, request.getParams());
@@ -196,7 +198,10 @@ public class ActorInvoker {
 		// Create an actor object
 		Object actor;
 		try {
-			actor = factory == null ? IoTFramework.getGlobalInstanceFactory().getInstance(actorClass) : factory.getInstance(request, info);
+			// Get authorizer object.
+			ActorFactory fac = factory;
+			// Create an actor object.
+			actor = fac == null ? IoTFramework.getGlobalInstanceFactory().getInstance(actorClass) : fac.getInstance(request, info);
 		} catch (Exception e) {
 
 			// Get message
@@ -279,8 +284,10 @@ public class ActorInvoker {
 		// ---------------------------- Permission verification ----------------------------
 
 		try {
+			// Get authorizer object.
+			ActorAuthorizer auth = authorizer;
 			// Permission verification
-			if (authorizer != null && !authorizer.verifyPermission(request, info)) {
+			if (auth != null && !auth.verifyPermission(request, info)) {
 
 				// Get the parameter values
 				String value = getParamValues(command, request.getParams());
@@ -344,7 +351,10 @@ public class ActorInvoker {
 		// Create an actor object
 		Object actor;
 		try {
-			actor = factory == null ? IoTFramework.getGlobalInstanceFactory().getInstance(actorClass) : factory.getInstance(request, info);
+			// Get authorizer object.
+			ActorFactory fac = factory;
+			// Create an actor object.
+			actor = fac == null ? IoTFramework.getGlobalInstanceFactory().getInstance(actorClass) : fac.getInstance(request, info);
 		} catch (Exception e) {
 
 			// Get message
