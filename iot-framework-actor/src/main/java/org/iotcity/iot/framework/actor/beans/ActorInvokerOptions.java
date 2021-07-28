@@ -16,10 +16,6 @@ public class ActorInvokerOptions {
 	 */
 	public ActorFactory factory;
 	/**
-	 * The actor authorizer for permission verification (optional, Set to null when permission verification is not required).
-	 */
-	public ActorAuthorizer authorizer;
-	/**
 	 * The logger from manager (optional, it can be set to null when using FrameworkActor logger instance).
 	 */
 	public Logger logger;

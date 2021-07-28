@@ -27,6 +27,10 @@ public class ApplicationConfig {
 	 */
 	public String[] ignorePackages;
 	/**
+	 * The permission validation object class for current application.
+	 */
+	public Class<?> authorizer;
+	/**
 	 * Document description of this application.
 	 */
 	public String doc;

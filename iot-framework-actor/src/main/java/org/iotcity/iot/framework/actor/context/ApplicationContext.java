@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.iotcity.iot.framework.actor.ActorManager;
+import org.iotcity.iot.framework.actor.beans.ActorAuthorizer;
 import org.iotcity.iot.framework.core.util.helper.JavaHelper;
 import org.iotcity.iot.framework.core.util.helper.StringHelper;
 import org.iotcity.iot.framework.core.util.task.TaskHandler;
@@ -44,6 +45,10 @@ public final class ApplicationContext {
 	 * Task handler objects supporting thread pool to execute tasks and timer tasks (not null).
 	 */
 	private TaskHandler taskHandler;
+	/**
+	 * The permission validation object of this application context.
+	 */
+	private ActorAuthorizer authorizer;
 	/**
 	 * All modules in this application, the key is module ID (upper case), the value is module context object.
 	 */
@@ -89,6 +94,21 @@ public final class ApplicationContext {
 	 */
 	public void setTaskHandler(TaskHandler taskHandler) {
 		if (taskHandler != null) this.taskHandler = taskHandler;
+	}
+
+	/**
+	 * Gets the permission validation object of this application context (returns null if the authorizer does not exists).
+	 */
+	public ActorAuthorizer getAuthorizer() {
+		return authorizer;
+	}
+
+	/**
+	 * Set a permission validation object to this application context (set to null when permission verification is not required).
+	 * @param autorizer The permission validation object.
+	 */
+	public void setAuthorizer(ActorAuthorizer authorizer) {
+		this.authorizer = authorizer;
 	}
 
 	/**

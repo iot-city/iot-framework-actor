@@ -5,9 +5,11 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.iotcity.iot.framework.IoTFramework;
 import org.iotcity.iot.framework.actor.annotation.Actor;
 import org.iotcity.iot.framework.actor.annotation.Command;
 import org.iotcity.iot.framework.actor.annotation.Permission;
+import org.iotcity.iot.framework.actor.beans.ActorAuthorizer;
 import org.iotcity.iot.framework.actor.config.ApplicationConfig;
 import org.iotcity.iot.framework.actor.config.ApplicationConfigModule;
 import org.iotcity.iot.framework.actor.config.ApplicationConfigPool;
@@ -59,7 +61,6 @@ public class ActorConfigure extends PropertiesConfigure<ApplicationContext[]> {
 		// Traverse all application configurations
 		for (ApplicationConfig config : configs) {
 			if (config == null || StringHelper.isEmpty(config.appID)) continue;
-			if (config.packages == null || config.packages.length == 0) continue;
 
 			// The task handler object
 			TaskHandler taskHandler;
@@ -72,6 +73,19 @@ public class ActorConfigure extends PropertiesConfigure<ApplicationContext[]> {
 			}
 			// Create application
 			ApplicationContext app = new ApplicationContext((ActorManager) configurable, taskHandler, config.appID, config.version, config.enabled, config.doc);
+
+			// Get authorizer class.
+			Class<?> clazz = config.authorizer;
+			// Set authorizer
+			if (clazz != null && ActorAuthorizer.class.isAssignableFrom(clazz)) {
+				try {
+					ActorAuthorizer authorizer = IoTFramework.getGlobalInstanceFactory().getInstance(clazz);
+					app.setAuthorizer(authorizer);
+				} catch (Exception e) {
+					FrameworkActor.getLogger().error(e);
+				}
+			}
+
 			// Add all predefined modules
 			ApplicationConfigModule[] modules = config.modules;
 			if (modules != null && modules.length > 0) {
@@ -83,6 +97,8 @@ public class ActorConfigure extends PropertiesConfigure<ApplicationContext[]> {
 			// Add to list
 			list.add(app);
 
+			// Analyze packages.
+			if (config.packages == null || config.packages.length == 0) continue;
 			// Create the analyzer
 			AnnotationAnalyzer analyzer = new AnnotationAnalyzer();
 			analyzer.addAllPackages(config.packages, config.ignorePackages);

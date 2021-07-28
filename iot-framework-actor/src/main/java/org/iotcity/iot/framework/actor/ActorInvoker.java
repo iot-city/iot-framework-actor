@@ -37,13 +37,13 @@ public class ActorInvoker {
 	 */
 	protected final ActorManager manager;
 	/**
-	 * Actor factory for actor instance creation (optional, it can be set to null value when using {@link IoTFramework }.getGlobalInstanceFactory() to create an instance).
-	 */
-	protected ActorFactory factory;
-	/**
 	 * The actor authorizer for permission verification (optional, Set to null when permission verification is not required).
 	 */
 	protected ActorAuthorizer authorizer;
+	/**
+	 * Actor factory for actor instance creation (optional, it can be set to null value when using {@link IoTFramework }.getGlobalInstanceFactory() to create an instance).
+	 */
+	protected ActorFactory factory;
 	/**
 	 * The system logger from manager.
 	 */
@@ -87,18 +87,32 @@ public class ActorInvoker {
 	}
 
 	/**
+	 * Gets a default permission validation object of this invoker (returns null if the authorizer does not exists).
+	 */
+	public ActorAuthorizer getAuthorizer() {
+		return authorizer;
+	}
+
+	/**
+	 * Set a default permission validation object to this invoker (set to null when permission verification is not required).<br/>
+	 * The permission validation object in application context will be used preferentially.
+	 * @param autorizer The permission validation object.
+	 */
+	public void setAuthorizer(ActorAuthorizer authorizer) {
+		this.authorizer = authorizer;
+	}
+
+	/**
 	 * Set invoker options.
 	 * @param options The invoker options, you can set actor factory, authorizer, logger or locale in this options (optional, it can be set to null when using the default configure).
 	 */
 	public void setOptions(ActorInvokerOptions options) {
 		if (options != null) {
 			this.factory = options.factory;
-			this.authorizer = options.authorizer;
 			this.logger = options.logger == null ? FrameworkActor.getLogger() : options.logger;
 			this.locale = options.locale == null ? FrameworkActor.getLocale() : options.locale;
 		} else {
 			this.factory = null;
-			this.authorizer = null;
 			this.logger = FrameworkActor.getLogger();
 			this.locale = FrameworkActor.getLocale();
 		}
@@ -134,8 +148,10 @@ public class ActorInvoker {
 
 		try {
 
-			// Get authorizer object.
-			ActorAuthorizer auth = authorizer;
+			// Get authorizer object of application.
+			ActorAuthorizer auth = info.getApplication().getAuthorizer();
+			// Use invoker global authorizer by default.
+			if (auth == null) auth = authorizer;
 			// Permission verification
 			if (auth != null && !auth.verifyPermission(request, info)) {
 
@@ -284,8 +300,10 @@ public class ActorInvoker {
 		// ---------------------------- Permission verification ----------------------------
 
 		try {
-			// Get authorizer object.
-			ActorAuthorizer auth = authorizer;
+			// Get authorizer object of application.
+			ActorAuthorizer auth = info.getApplication().getAuthorizer();
+			// Use invoker global authorizer by default.
+			if (auth == null) auth = authorizer;
 			// Permission verification
 			if (auth != null && !auth.verifyPermission(request, info)) {
 
