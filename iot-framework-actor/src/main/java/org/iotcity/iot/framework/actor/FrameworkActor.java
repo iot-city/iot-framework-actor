@@ -29,7 +29,7 @@ public final class FrameworkActor {
 
 	/**
 	 * Gets the global actor manager of framework (returns not null).
-	 * @return An global actor manager to manage applications.
+	 * @return The global actor manager to manage applications.
 	 */
 	public static final ActorManager getGlobalActorManager() {
 		return actorManager;
@@ -37,7 +37,7 @@ public final class FrameworkActor {
 
 	/**
 	 * Gets the global actor invoker of framework (returns not null).
-	 * @return An global actor invoker for actor request invoking.
+	 * @return The global actor invoker for actor request invoking.
 	 */
 	public static final ActorInvoker getGlobalActorInvoker() {
 		return actorInvoker;
