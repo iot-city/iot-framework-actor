@@ -39,7 +39,7 @@ public final class PermissionContext {
 	 * Gets all permission values.
 	 * @return Permission values.
 	 */
-	public Integer[] values() {
+	public synchronized Integer[] values() {
 		return pvalues.toArray(new Integer[pvalues.size()]);
 	}
 
@@ -47,7 +47,7 @@ public final class PermissionContext {
 	 * Add a permission value to handler.
 	 * @param value The permission value.
 	 */
-	public void add(int value) {
+	public synchronized void add(int value) {
 		pvalues.add(value);
 	}
 
@@ -55,7 +55,7 @@ public final class PermissionContext {
 	 * Add permission values to handler.
 	 * @param values The permission values.
 	 */
-	public void addAll(int... values) {
+	public synchronized void addAll(int... values) {
 		if (values == null) return;
 		for (int value : values) {
 			pvalues.add(value);
@@ -79,7 +79,7 @@ public final class PermissionContext {
 	 * Remove a permission value from handler.
 	 * @param value The permission value.
 	 */
-	public void remove(int value) {
+	public synchronized void remove(int value) {
 		pvalues.remove(value);
 	}
 

@@ -123,7 +123,7 @@ public final class ApplicationContext {
 	 * Gets all modules in this application (returns not null).
 	 * @return All modules in this application.
 	 */
-	public ModuleContext[] getModules() {
+	public synchronized ModuleContext[] getModules() {
 		return this.modules.values().toArray(new ModuleContext[this.modules.size()]);
 	}
 

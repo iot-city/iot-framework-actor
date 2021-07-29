@@ -75,7 +75,7 @@ public final class ModuleContext {
 	 * Gets all actors in this module (returns not null).
 	 * @return All actors in this module.
 	 */
-	public ActorContext[] getActors() {
+	public synchronized ActorContext[] getActors() {
 		return this.actors.values().toArray(new ActorContext[this.actors.size()]);
 	}
 

@@ -89,7 +89,7 @@ public final class ActorContext {
 	 * Gets all commands in this actor.
 	 * @return All commands in this actor.
 	 */
-	public CommandContext[] getCommands() {
+	public synchronized CommandContext[] getCommands() {
 		return this.commands.values().toArray(new CommandContext[this.commands.size()]);
 	}
 
