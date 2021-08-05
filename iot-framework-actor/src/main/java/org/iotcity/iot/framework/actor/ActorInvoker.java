@@ -41,7 +41,7 @@ public class ActorInvoker {
 	 */
 	protected ActorAuthorizer authorizer;
 	/**
-	 * Actor factory for actor instance creation (optional, it can be set to null value when using {@link IoTFramework }.getGlobalInstanceFactory() to create an instance).
+	 * Actor factory for actor instance creation (optional, it can be set to null value when using {@link IoTFramework } to create an instance).
 	 */
 	protected ActorFactory factory;
 	/**
@@ -217,7 +217,7 @@ public class ActorInvoker {
 			// Get authorizer object.
 			ActorFactory fac = factory;
 			// Create an actor object.
-			actor = fac == null ? IoTFramework.getGlobalInstanceFactory().getInstance(actorClass) : fac.getInstance(request, info);
+			actor = fac == null ? IoTFramework.getInstance(actorClass) : fac.getInstance(request, info);
 		} catch (Exception e) {
 
 			// Get message
@@ -372,7 +372,7 @@ public class ActorInvoker {
 			// Get authorizer object.
 			ActorFactory fac = factory;
 			// Create an actor object.
-			actor = fac == null ? IoTFramework.getGlobalInstanceFactory().getInstance(actorClass) : fac.getInstance(request, info);
+			actor = fac == null ? IoTFramework.getInstance(actorClass) : fac.getInstance(request, info);
 		} catch (Exception e) {
 
 			// Get message

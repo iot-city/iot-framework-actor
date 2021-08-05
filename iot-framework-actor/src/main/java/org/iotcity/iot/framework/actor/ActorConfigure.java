@@ -79,7 +79,7 @@ public class ActorConfigure extends PropertiesConfigure<ApplicationContext[]> {
 			// Set authorizer
 			if (clazz != null && ActorAuthorizer.class.isAssignableFrom(clazz)) {
 				try {
-					ActorAuthorizer authorizer = IoTFramework.getGlobalInstanceFactory().getInstance(clazz);
+					ActorAuthorizer authorizer = IoTFramework.getInstance(clazz);
 					app.setAuthorizer(authorizer);
 				} catch (Exception e) {
 					FrameworkActor.getLogger().error(e);
