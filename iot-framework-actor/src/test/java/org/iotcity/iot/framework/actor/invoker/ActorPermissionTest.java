@@ -30,7 +30,7 @@ public class ActorPermissionTest extends TestCase {
 
 		ActorConfigure configure = new ActorConfigure();
 		PropertiesConfigFile file = new PropertiesConfigFile();
-		file.file = "org/iotcity/iot/framework/actor/iot-actor-template.properties";
+		file.file = "org/iotcity/iot/framework/actor/framework-actor-test.properties";
 		file.fromPackage = true;
 		configure.config(file, manager, true);
 

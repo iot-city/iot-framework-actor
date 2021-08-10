@@ -27,7 +27,7 @@ public class ActorBusEventTest extends TestCase {
 		logger.info("----------------------------- TEST ACTOR BUS EVENT -----------------------------");
 
 		ActorConfigure configure = new ActorConfigure();
-		PropertiesConfigFile file = new PropertiesConfigFile("org/iotcity/iot/framework/actor/iot-actor-template.properties", null, true);
+		PropertiesConfigFile file = new PropertiesConfigFile("org/iotcity/iot/framework/actor/framework-actor-test.properties", null, true);
 		configure.config(file, FrameworkActor.getGlobalActorManager(), true);
 
 		logger.info("----------------------------- TEST ACTOR SYNC EVENT -----------------------------");
