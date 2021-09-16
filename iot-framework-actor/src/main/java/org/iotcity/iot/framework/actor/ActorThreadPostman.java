@@ -41,4 +41,9 @@ public class ActorThreadPostman implements ThreadLocalPostman {
 		ActorThreadLocal.setAsyncCallback(asyncCallback);
 	}
 
+	@Override
+	public void removeAll() {
+		ActorThreadLocal.removeAll();
+	}
+
 }

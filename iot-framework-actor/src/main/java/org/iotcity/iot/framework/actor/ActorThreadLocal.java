@@ -51,6 +51,15 @@ public final class ActorThreadLocal {
 		asyncCallback.set(callback);
 	}
 
+	/**
+	 * Remove all actor thread local variables.
+	 */
+	static final void removeAll() {
+		localRequest.remove();
+		commandInfo.remove();
+		asyncCallback.remove();
+	}
+
 	// --------------------------- Public methods ----------------------------
 
 	/**

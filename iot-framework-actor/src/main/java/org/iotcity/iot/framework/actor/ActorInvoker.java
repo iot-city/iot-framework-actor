@@ -139,131 +139,137 @@ public class ActorInvoker {
 		// Create command information data
 		CommandInfo info = new CommandInfoData(manager, command.actor.module.app, command.actor.module, command.actor, command);
 
-		// Set command information to thread local
-		ActorThreadLocal.setCommandInfo(info);
-		// Set request to thread local
-		ActorThreadLocal.setRequest(request);
-
-		// ---------------------------- Permission verification ----------------------------
-
 		try {
+			// Set command information to thread local
+			ActorThreadLocal.setCommandInfo(info);
+			// Set request to thread local
+			ActorThreadLocal.setRequest(request);
 
-			// Get authorizer object of application.
-			ActorAuthorizer auth = info.getApplication().getAuthorizer();
-			// Use invoker global authorizer by default.
-			if (auth == null) auth = authorizer;
-			// Permission verification
-			if (auth != null && !auth.verifyPermission(request, info)) {
+			// ---------------------------- Permission verification ----------------------------
+
+			try {
+
+				// Get authorizer object of application.
+				ActorAuthorizer auth = info.getApplication().getAuthorizer();
+				// Use invoker global authorizer by default.
+				if (auth == null) auth = authorizer;
+				// Permission verification
+				if (auth != null && !auth.verifyPermission(request, info)) {
+
+					// Get the parameter values
+					String value = getParamValues(command, request.getParams());
+					// Get unauthorized message
+					String userMsg = FrameworkActor.getLocale(langs).text("actor.invoke.permission.info");
+					// Get logger message
+					String logMsg = locale.text("actor.invoke.permission.error", command.actor.module.app.appID, command.actor.module.moduleID, command.actor.actorID, command.cmd, value, userMsg);
+					// Logs unauthorized message
+					logger.warn(logMsg);
+					// Callback a UNAUTHORIZED message
+					return new ActorResponseData(ActorResponseStatus.UNAUTHORIZED, userMsg, null, null);
+
+				}
+
+			} catch (Exception e) {
 
 				// Get the parameter values
 				String value = getParamValues(command, request.getParams());
-				// Get unauthorized message
-				String userMsg = FrameworkActor.getLocale(langs).text("actor.invoke.permission.info");
-				// Get logger message
-				String logMsg = locale.text("actor.invoke.permission.error", command.actor.module.app.appID, command.actor.module.moduleID, command.actor.actorID, command.cmd, value, userMsg);
-				// Logs unauthorized message
-				logger.warn(logMsg);
-				// Callback a UNAUTHORIZED message
-				return new ActorResponseData(ActorResponseStatus.UNAUTHORIZED, userMsg, null, null);
+				// Get error message: Permission verification failed, current application: "{0}", module: "{1}", actor: "{2}", command: "{3}", method data: {4}, error message: {5}
+				String logMsg = locale.text("actor.invoke.permission.error", command.actor.module.app.appID, command.actor.module.moduleID, command.actor.actorID, command.cmd, value, e.getMessage());
+				// Check for logical error
+				if (e instanceof ActorError) {
+					// Logs warn message
+					logger.warn(logMsg);
+					// Return a unauthorized response
+					return new ActorResponseData(ActorResponseStatus.UNAUTHORIZED, e.getMessage(), null, null);
+				} else {
+					// Return an exception response
+					return getExceptionResponse(ActorResponseStatus.EXCEPTION, null, langs, logMsg, e);
+				}
 
 			}
 
-		} catch (Exception e) {
+			// ---------------------------- Actor creation ----------------------------
 
-			// Get the parameter values
-			String value = getParamValues(command, request.getParams());
-			// Get error message: Permission verification failed, current application: "{0}", module: "{1}", actor: "{2}", command: "{3}", method data: {4}, error message: {5}
-			String logMsg = locale.text("actor.invoke.permission.error", command.actor.module.app.appID, command.actor.module.moduleID, command.actor.actorID, command.cmd, value, e.getMessage());
-			// Check for logical error
-			if (e instanceof ActorError) {
-				// Logs warn message
+			// Get command information
+			Class<?> actorClass = command.actor.actorClass;
+			Method method = command.method;
+			Serializable[] params = request.getParams();
+			int paramsCount = method.getParameterCount();
+
+			// Verify parameters
+			if (paramsCount > 0 && (params == null || params.length != paramsCount)) {
+
+				// Get user message
+				String userMsg = FrameworkActor.getLocale(langs).text("actor.invoke.params.count");
+				// Get illegal message
+				String paramMsg = getErrorParamTypesInfo(method, params);
+				// Get error message: Command \"{0}\" method \"{1}.{2}(...)\" logic error: {3}".
+				String logMsg = locale.text("actor.invoke.logic.error", command.cmd, actorClass.getSimpleName(), method.getName(), paramMsg);
+				// Logs error message
 				logger.warn(logMsg);
-				// Return a unauthorized response
-				return new ActorResponseData(ActorResponseStatus.UNAUTHORIZED, e.getMessage(), null, null);
+				// Callback response
+				return new ActorResponseData(ActorResponseStatus.BAD_PARAMETERS, userMsg, logMsg, null);
+
+			}
+
+			// Create an actor object
+			Object actor;
+			try {
+				// Get authorizer object.
+				ActorFactory fac = factory;
+				// Create an actor object.
+				actor = fac == null ? IoTFramework.getInstance(actorClass) : fac.getInstance(request, info);
+			} catch (Exception e) {
+
+				// Get message
+				String logMsg = locale.text("actor.invoke.create.error", actorClass.getName(), e.getMessage());
+				// Check for logical error
+				if (e instanceof ActorError) {
+					// Logs warn message
+					logger.warn(logMsg);
+					// Return response data
+					return new ActorResponseData(ActorResponseStatus.REJECT, e.getMessage(), null, null);
+				} else {
+					// Return an exception response
+					return getExceptionResponse(ActorResponseStatus.EXCEPTION, null, langs, logMsg, e);
+				}
+
+			}
+
+			// Whether actor is valid
+			if (actor == null) return new ActorResponseData(ActorResponseStatus.REJECT, null, null, null);
+
+			// ---------------------------- Method invoking ----------------------------
+
+			// Create asynchronous callback handler
+			AsyncCallbackLocker asyncCallback = null;
+			// Whether the method run in asynchronous mode
+			if (command.async) {
+				// Create callback object
+				asyncCallback = new AsyncCallbackLocker(request, info, timeout);
+				// Set callback to thread local
+				ActorThreadLocal.setAsyncCallback(asyncCallback);
+			}
+
+			// Call method process (response not null)
+			ActorResponse response = callMethod(langs, actor, command, method, params, paramsCount);
+
+			// Whether waiting for asynchronous response
+			if (response.getStatus() == ActorResponseStatus.ACCEPTED) {
+				// Wait for response callback
+				asyncCallback.waitForResponse();
+				// Get asynchronous response after unlock
+				response = asyncCallback.getResponse();
+				// Return data
+				return response == null ? new ActorResponseData(ActorResponseStatus.TIMEOUT, null, null, null) : response;
 			} else {
-				// Return an exception response
-				return getExceptionResponse(ActorResponseStatus.EXCEPTION, null, langs, logMsg, e);
+				// Return data
+				return response;
 			}
 
-		}
-
-		// ---------------------------- Actor creation ----------------------------
-
-		// Get command information
-		Class<?> actorClass = command.actor.actorClass;
-		Method method = command.method;
-		Serializable[] params = request.getParams();
-		int paramsCount = method.getParameterCount();
-
-		// Verify parameters
-		if (paramsCount > 0 && (params == null || params.length != paramsCount)) {
-
-			// Get user message
-			String userMsg = FrameworkActor.getLocale(langs).text("actor.invoke.params.count");
-			// Get illegal message
-			String paramMsg = getErrorParamTypesInfo(method, params);
-			// Get error message: Command \"{0}\" method \"{1}.{2}(...)\" logic error: {3}".
-			String logMsg = locale.text("actor.invoke.logic.error", command.cmd, actorClass.getSimpleName(), method.getName(), paramMsg);
-			// Logs error message
-			logger.warn(logMsg);
-			// Callback response
-			return new ActorResponseData(ActorResponseStatus.BAD_PARAMETERS, userMsg, logMsg, null);
-
-		}
-
-		// Create an actor object
-		Object actor;
-		try {
-			// Get authorizer object.
-			ActorFactory fac = factory;
-			// Create an actor object.
-			actor = fac == null ? IoTFramework.getInstance(actorClass) : fac.getInstance(request, info);
-		} catch (Exception e) {
-
-			// Get message
-			String logMsg = locale.text("actor.invoke.create.error", actorClass.getName(), e.getMessage());
-			// Check for logical error
-			if (e instanceof ActorError) {
-				// Logs warn message
-				logger.warn(logMsg);
-				// Return response data
-				return new ActorResponseData(ActorResponseStatus.REJECT, e.getMessage(), null, null);
-			} else {
-				// Return an exception response
-				return getExceptionResponse(ActorResponseStatus.EXCEPTION, null, langs, logMsg, e);
-			}
-
-		}
-
-		// Whether actor is valid
-		if (actor == null) return new ActorResponseData(ActorResponseStatus.REJECT, null, null, null);
-
-		// ---------------------------- Method invoking ----------------------------
-
-		// Create asynchronous callback handler
-		AsyncCallbackLocker asyncCallback = null;
-		// Whether the method run in asynchronous mode
-		if (command.async) {
-			// Create callback object
-			asyncCallback = new AsyncCallbackLocker(request, info, timeout);
-			// Set callback to thread local
-			ActorThreadLocal.setAsyncCallback(asyncCallback);
-		}
-
-		// Call method process (response not null)
-		ActorResponse response = callMethod(langs, actor, command, method, params, paramsCount);
-
-		// Whether waiting for asynchronous response
-		if (response.getStatus() == ActorResponseStatus.ACCEPTED) {
-			// Wait for response callback
-			asyncCallback.waitForResponse();
-			// Get asynchronous response after unlock
-			response = asyncCallback.getResponse();
-			// Return data
-			return response == null ? new ActorResponseData(ActorResponseStatus.TIMEOUT, null, null, null) : response;
-		} else {
-			// Return data
-			return response;
+		} finally {
+			// Remove all actor thread local variables.
+			ActorThreadLocal.removeAll();
 		}
 
 	}
@@ -292,140 +298,146 @@ public class ActorInvoker {
 		// Create command information data
 		CommandInfo info = new CommandInfoData(manager, command.actor.module.app, command.actor.module, command.actor, command);
 
-		// Set command information to thread local
-		ActorThreadLocal.setCommandInfo(info);
-		// Set request to thread local
-		ActorThreadLocal.setRequest(request);
-
-		// ---------------------------- Permission verification ----------------------------
-
 		try {
-			// Get authorizer object of application.
-			ActorAuthorizer auth = info.getApplication().getAuthorizer();
-			// Use invoker global authorizer by default.
-			if (auth == null) auth = authorizer;
-			// Permission verification
-			if (auth != null && !auth.verifyPermission(request, info)) {
+			// Set command information to thread local
+			ActorThreadLocal.setCommandInfo(info);
+			// Set request to thread local
+			ActorThreadLocal.setRequest(request);
+
+			// ---------------------------- Permission verification ----------------------------
+
+			try {
+				// Get authorizer object of application.
+				ActorAuthorizer auth = info.getApplication().getAuthorizer();
+				// Use invoker global authorizer by default.
+				if (auth == null) auth = authorizer;
+				// Permission verification
+				if (auth != null && !auth.verifyPermission(request, info)) {
+
+					// Get the parameter values
+					String value = getParamValues(command, request.getParams());
+					// Get unauthorized message
+					String userMsg = FrameworkActor.getLocale(langs).text("actor.invoke.permission.info");
+					// Get logger message
+					String logMsg = locale.text("actor.invoke.permission.error", command.actor.module.app.appID, command.actor.module.moduleID, command.actor.actorID, command.cmd, value, userMsg);
+					// Logs unauthorized message
+					logger.warn(logMsg);
+					// Callback a UNAUTHORIZED message
+					callback.callback(new ActorResponseData(ActorResponseStatus.UNAUTHORIZED, userMsg, null, null));
+
+					return;
+				}
+			} catch (Exception e) {
 
 				// Get the parameter values
 				String value = getParamValues(command, request.getParams());
-				// Get unauthorized message
-				String userMsg = FrameworkActor.getLocale(langs).text("actor.invoke.permission.info");
-				// Get logger message
-				String logMsg = locale.text("actor.invoke.permission.error", command.actor.module.app.appID, command.actor.module.moduleID, command.actor.actorID, command.cmd, value, userMsg);
-				// Logs unauthorized message
+				// Get error message: Permission verification failed, current application: "{0}", module: "{1}", actor: "{2}", command: "{3}", method data: {4}, error message: {5}
+				String logMsg = locale.text("actor.invoke.permission.error", command.actor.module.app.appID, command.actor.module.moduleID, command.actor.actorID, command.cmd, value, e.getMessage());
+				// Check for logical error
+				if (e instanceof ActorError) {
+					// Logs info message
+					logger.info(logMsg);
+					// Callback a UNAUTHORIZED message
+					callback.callback(new ActorResponseData(ActorResponseStatus.UNAUTHORIZED, e.getMessage(), null, null));
+				} else {
+					// Return exception
+					callback.callback(getExceptionResponse(ActorResponseStatus.EXCEPTION, null, langs, logMsg, e));
+				}
+
+				// Return when exception thrown
+				return;
+			}
+
+			// ---------------------------- Actor creation ----------------------------
+
+			// Get command information
+			Class<?> actorClass = command.actor.actorClass;
+			Method method = command.method;
+			Serializable[] params = request.getParams();
+			int paramsCount = method.getParameterCount();
+
+			// Verify parameters
+			if (paramsCount > 0 && (params == null || params.length != paramsCount)) {
+
+				// Get user message
+				String userMsg = FrameworkActor.getLocale(langs).text("actor.invoke.params.count");
+				// Get illegal message
+				String paramMsg = getErrorParamTypesInfo(method, params);
+				// Get error message: Command \"{0}\" method \"{1}.{2}(...)\" logic error: {3}".
+				String logMsg = locale.text("actor.invoke.logic.error", command.cmd, actorClass.getSimpleName(), method.getName(), paramMsg);
+				// Logs error message
 				logger.warn(logMsg);
-				// Callback a UNAUTHORIZED message
-				callback.callback(new ActorResponseData(ActorResponseStatus.UNAUTHORIZED, userMsg, null, null));
+				// Callback response
+				callback.callback(new ActorResponseData(ActorResponseStatus.BAD_PARAMETERS, userMsg, logMsg, null));
 
 				return;
 			}
-		} catch (Exception e) {
 
-			// Get the parameter values
-			String value = getParamValues(command, request.getParams());
-			// Get error message: Permission verification failed, current application: "{0}", module: "{1}", actor: "{2}", command: "{3}", method data: {4}, error message: {5}
-			String logMsg = locale.text("actor.invoke.permission.error", command.actor.module.app.appID, command.actor.module.moduleID, command.actor.actorID, command.cmd, value, e.getMessage());
-			// Check for logical error
-			if (e instanceof ActorError) {
-				// Logs info message
-				logger.info(logMsg);
-				// Callback a UNAUTHORIZED message
-				callback.callback(new ActorResponseData(ActorResponseStatus.UNAUTHORIZED, e.getMessage(), null, null));
-			} else {
-				// Return exception
-				callback.callback(getExceptionResponse(ActorResponseStatus.EXCEPTION, null, langs, logMsg, e));
+			// Create an actor object
+			Object actor;
+			try {
+				// Get authorizer object.
+				ActorFactory fac = factory;
+				// Create an actor object.
+				actor = fac == null ? IoTFramework.getInstance(actorClass) : fac.getInstance(request, info);
+			} catch (Exception e) {
+
+				// Get message
+				String logMsg = locale.text("actor.invoke.create.error", actorClass.getName(), e.getMessage());
+				// Check for logical error
+				if (e instanceof ActorError) {
+					// Logs warn message
+					logger.warn(logMsg);
+					// Return response data
+					callback.callback(new ActorResponseData(ActorResponseStatus.REJECT, e.getMessage(), null, null));
+				} else {
+					// Return an exception response
+					callback.callback(getExceptionResponse(ActorResponseStatus.EXCEPTION, null, langs, logMsg, e));
+				}
+
+				return;
 			}
 
-			// Return when exception thrown
-			return;
-		}
-
-		// ---------------------------- Actor creation ----------------------------
-
-		// Get command information
-		Class<?> actorClass = command.actor.actorClass;
-		Method method = command.method;
-		Serializable[] params = request.getParams();
-		int paramsCount = method.getParameterCount();
-
-		// Verify parameters
-		if (paramsCount > 0 && (params == null || params.length != paramsCount)) {
-
-			// Get user message
-			String userMsg = FrameworkActor.getLocale(langs).text("actor.invoke.params.count");
-			// Get illegal message
-			String paramMsg = getErrorParamTypesInfo(method, params);
-			// Get error message: Command \"{0}\" method \"{1}.{2}(...)\" logic error: {3}".
-			String logMsg = locale.text("actor.invoke.logic.error", command.cmd, actorClass.getSimpleName(), method.getName(), paramMsg);
-			// Logs error message
-			logger.warn(logMsg);
-			// Callback response
-			callback.callback(new ActorResponseData(ActorResponseStatus.BAD_PARAMETERS, userMsg, logMsg, null));
-
-			return;
-		}
-
-		// Create an actor object
-		Object actor;
-		try {
-			// Get authorizer object.
-			ActorFactory fac = factory;
-			// Create an actor object.
-			actor = fac == null ? IoTFramework.getInstance(actorClass) : fac.getInstance(request, info);
-		} catch (Exception e) {
-
-			// Get message
-			String logMsg = locale.text("actor.invoke.create.error", actorClass.getName(), e.getMessage());
-			// Check for logical error
-			if (e instanceof ActorError) {
-				// Logs warn message
-				logger.warn(logMsg);
-				// Return response data
-				callback.callback(new ActorResponseData(ActorResponseStatus.REJECT, e.getMessage(), null, null));
-			} else {
-				// Return an exception response
-				callback.callback(getExceptionResponse(ActorResponseStatus.EXCEPTION, null, langs, logMsg, e));
+			// Whether actor is valid
+			if (actor == null) {
+				callback.callback(new ActorResponseData(ActorResponseStatus.REJECT, null, null, null));
+				return;
 			}
 
-			return;
-		}
+			// ---------------------------- Method invoking ----------------------------
 
-		// Whether actor is valid
-		if (actor == null) {
-			callback.callback(new ActorResponseData(ActorResponseStatus.REJECT, null, null, null));
-			return;
-		}
+			// Create asynchronous callback handler
+			AsyncCallbackTimer asyncCallback = null;
+			// Whether the method run in asynchronous mode
+			if (command.async) {
+				// Create callback object
+				asyncCallback = new AsyncCallbackTimer(request, info, callback, timeout);
+				// Set callback to thread local
+				ActorThreadLocal.setAsyncCallback(asyncCallback);
+			}
 
-		// ---------------------------- Method invoking ----------------------------
+			// Call method process (response not null)
+			ActorResponse response = callMethod(langs, actor, command, method, params, paramsCount);
 
-		// Create asynchronous callback handler
-		AsyncCallbackTimer asyncCallback = null;
-		// Whether the method run in asynchronous mode
-		if (command.async) {
-			// Create callback object
-			asyncCallback = new AsyncCallbackTimer(request, info, callback, timeout);
-			// Set callback to thread local
-			ActorThreadLocal.setAsyncCallback(asyncCallback);
-		}
-
-		// Call method process (response not null)
-		ActorResponse response = callMethod(langs, actor, command, method, params, paramsCount);
-
-		// Whether waiting for asynchronous response
-		if (response.getStatus() == ActorResponseStatus.ACCEPTED) {
-			// Start a response timer task
-			asyncCallback.waitForResponse();
-			// Callback ACCEPTED data first
-			callback.callback(response);
-		} else {
-			if (asyncCallback == null) {
-				// no asynchronous callback object, callback directly
+			// Whether waiting for asynchronous response
+			if (response.getStatus() == ActorResponseStatus.ACCEPTED) {
+				// Start a response timer task
+				asyncCallback.waitForResponse();
+				// Callback ACCEPTED data first
 				callback.callback(response);
 			} else {
-				// Callback data using asynchronous callback object
-				asyncCallback.callback(response);
+				if (asyncCallback == null) {
+					// no asynchronous callback object, callback directly
+					callback.callback(response);
+				} else {
+					// Callback data using asynchronous callback object
+					asyncCallback.callback(response);
+				}
 			}
+
+		} finally {
+			// Remove all actor thread local variables.
+			ActorThreadLocal.removeAll();
 		}
 
 	}
