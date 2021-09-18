@@ -37,4 +37,11 @@ public class ActorConfigureManager extends PropertiesConfigureManager {
 
 	}
 
+	@Override
+	protected void onPerformed() {
+		// Reset the invoker options.
+		ActorInvoker invoker = FrameworkActor.getGlobalActorInvoker();
+		invoker.setOptions(invoker.getOptions());
+	}
+
 }

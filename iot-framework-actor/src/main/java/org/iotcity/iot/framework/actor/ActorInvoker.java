@@ -42,6 +42,10 @@ public final class ActorInvoker {
 	 * The time in milliseconds to wait for the actor to complete data requests before the system shuts down (10000ms by default).
 	 */
 	private long waitForShuttingDwon = 10000;
+	/**
+	 * The invoker options that has been set.
+	 */
+	private ActorInvokerOptions options;
 
 	// ---------------------------------- Protected fields ----------------------------------
 
@@ -146,6 +150,7 @@ public final class ActorInvoker {
 	 * @param options The invoker options, you can set actor factory, authorizer, logger or locale in this options (optional, it can be set to null when using the default configure).
 	 */
 	public final void setOptions(ActorInvokerOptions options) {
+		this.options = options;
 		if (options != null) {
 			this.factory = options.factory;
 			this.logger = options.logger == null ? FrameworkActor.getLogger() : options.logger;
@@ -155,6 +160,13 @@ public final class ActorInvoker {
 			this.logger = FrameworkActor.getLogger();
 			this.locale = FrameworkActor.getLocale();
 		}
+	}
+
+	/**
+	 * Gets the invoker options (returns null if not set).
+	 */
+	public final ActorInvokerOptions getOptions() {
+		return options;
 	}
 
 	/**
