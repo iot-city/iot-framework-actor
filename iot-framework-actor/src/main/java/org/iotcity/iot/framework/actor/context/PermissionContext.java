@@ -31,7 +31,7 @@ public final class PermissionContext {
 	 * Gets permission size.
 	 * @return permission size.
 	 */
-	public int size() {
+	public final int size() {
 		return pvalues.size();
 	}
 
@@ -39,7 +39,7 @@ public final class PermissionContext {
 	 * Gets all permission values.
 	 * @return Permission values.
 	 */
-	public synchronized Integer[] values() {
+	public final synchronized Integer[] values() {
 		return pvalues.toArray(new Integer[pvalues.size()]);
 	}
 
@@ -47,7 +47,7 @@ public final class PermissionContext {
 	 * Add a permission value to handler.
 	 * @param value The permission value.
 	 */
-	public synchronized void add(int value) {
+	public final synchronized void add(int value) {
 		pvalues.add(value);
 	}
 
@@ -55,7 +55,7 @@ public final class PermissionContext {
 	 * Add permission values to handler.
 	 * @param values The permission values.
 	 */
-	public synchronized void addAll(int... values) {
+	public final synchronized void addAll(int... values) {
 		if (values == null) return;
 		for (int value : values) {
 			pvalues.add(value);
@@ -67,7 +67,7 @@ public final class PermissionContext {
 	 * @param values The permission values.
 	 * @return Returns true if one of the permission values already exists; otherwise, returns false.
 	 */
-	public boolean contains(int... values) {
+	public final boolean contains(int... values) {
 		if (values == null) return false;
 		for (int value : values) {
 			if (pvalues.contains(value)) return true;
@@ -79,12 +79,12 @@ public final class PermissionContext {
 	 * Remove a permission value from handler.
 	 * @param value The permission value.
 	 */
-	public synchronized void remove(int value) {
+	public final synchronized void remove(int value) {
 		pvalues.remove(value);
 	}
 
 	@Override
-	public String toString() {
+	public final String toString() {
 		return JavaHelper.getArrayPreview(pvalues.toArray(new Integer[pvalues.size()]), false);
 	}
 

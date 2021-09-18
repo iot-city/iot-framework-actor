@@ -25,7 +25,7 @@ public class ActorSyncCallAsyncbackTest extends TestCase {
 	 */
 	public void testInvoker() {
 		IoTFramework.init();
-		ActorManager manager = new ActorManager();
+		ActorManager manager = new ActorManager("Test");
 
 		ActorConfigure configure = new ActorConfigure();
 		PropertiesConfigFile file = new PropertiesConfigFile();

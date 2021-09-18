@@ -33,22 +33,22 @@ import org.iotcity.iot.framework.core.util.task.TaskHandler;
  * The default external file to load: "framework-actor.properties".
  * @author Ardon
  */
-public class ActorConfigure extends PropertiesConfigure<ApplicationContext[]> {
+public final class ActorConfigure extends PropertiesConfigure<ApplicationContext[]> {
 
 	// --------------------------- Public Methods ----------------------------
 
 	@Override
-	public String getPrefixKey() {
+	public final String getPrefixKey() {
 		return "iot.framework.actor.apps";
 	}
 
 	@Override
-	public PropertiesConfigFile getDefaultExternalFile() {
+	public final PropertiesConfigFile getDefaultExternalFile() {
 		return new PropertiesConfigFile("framework-actor.properties", "UTF-8", false);
 	}
 
 	@Override
-	public boolean config(Configurable<ApplicationContext[]> configurable, boolean reset) {
+	public final boolean config(Configurable<ApplicationContext[]> configurable, boolean reset) {
 		// Verify configurable object class
 		if (configurable == null || props == null || !(configurable instanceof ActorManager)) return false;
 

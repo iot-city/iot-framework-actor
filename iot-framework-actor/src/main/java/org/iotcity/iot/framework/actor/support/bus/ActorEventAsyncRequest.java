@@ -8,7 +8,7 @@ import org.iotcity.iot.framework.actor.beans.ActorResponseCallback;
  * @author ardon
  * @date 2021-05-12
  */
-public class ActorEventAsyncRequest {
+public final class ActorEventAsyncRequest {
 
 	/**
 	 * Actor request data object (not null).
@@ -50,21 +50,21 @@ public class ActorEventAsyncRequest {
 	/**
 	 * Gets actor request data object (returns not null).
 	 */
-	public ActorRequest getRequest() {
+	public final ActorRequest getRequest() {
 		return request;
 	}
 
 	/**
 	 * Gets actor response callback object (returns not null).
 	 */
-	public ActorResponseCallback getCallback() {
+	public final ActorResponseCallback getCallback() {
 		return callback;
 	}
 
 	/**
 	 * Gets response timeout milliseconds for command async mode only.
 	 */
-	public long getTimeout() {
+	public final long getTimeout() {
 		return timeout;
 	}
 

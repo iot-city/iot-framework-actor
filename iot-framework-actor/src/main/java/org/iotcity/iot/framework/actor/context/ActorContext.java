@@ -81,7 +81,7 @@ public final class ActorContext {
 	 * Gets commands size.
 	 * @return Commands size.
 	 */
-	public int getCommandSize() {
+	public final int getCommandSize() {
 		return this.commands.size();
 	}
 
@@ -89,7 +89,7 @@ public final class ActorContext {
 	 * Gets all commands in this actor.
 	 * @return All commands in this actor.
 	 */
-	public synchronized CommandContext[] getCommands() {
+	public final synchronized CommandContext[] getCommands() {
 		return this.commands.values().toArray(new CommandContext[this.commands.size()]);
 	}
 
@@ -104,7 +104,7 @@ public final class ActorContext {
 	 * @param doc Document description of this command.
 	 * @return The command context that be created in this actor (returns null if the cmd is invalid).
 	 */
-	public synchronized CommandContext addCommand(PermissionContext permission, String cmd, Method method, long timeout, Class<? extends Serializable> async, boolean enabled, String doc) {
+	public final synchronized CommandContext addCommand(PermissionContext permission, String cmd, Method method, long timeout, Class<? extends Serializable> async, boolean enabled, String doc) {
 		if (StringHelper.isEmpty(cmd)) return null;
 		CommandContext command = this.commands.get(cmd.toUpperCase());
 		if (command != null && command.method == method) return command;
@@ -124,7 +124,7 @@ public final class ActorContext {
 	 * @param cmd The command ID in this actor.
 	 * @return Command context object or null.
 	 */
-	public CommandContext getCommand(String cmd) {
+	public final CommandContext getCommand(String cmd) {
 		if (StringHelper.isEmpty(cmd)) return null;
 		return this.commands.get(cmd.toUpperCase());
 	}
@@ -134,7 +134,7 @@ public final class ActorContext {
 	 * @param cmd The command ID in this actor.
 	 * @return Returns true if cmd already exists; otherwise, returns false.
 	 */
-	public boolean hasCommand(String cmd) {
+	public final boolean hasCommand(String cmd) {
 		if (StringHelper.isEmpty(cmd)) return false;
 		return this.commands.containsKey(cmd.toUpperCase());
 	}
@@ -144,7 +144,7 @@ public final class ActorContext {
 	 * @param cmd The command ID in this actor.
 	 * @return The command context object that be removed, will returns null if mismatch.
 	 */
-	public synchronized CommandContext removeCommand(String cmd) {
+	public final synchronized CommandContext removeCommand(String cmd) {
 		if (StringHelper.isEmpty(cmd)) return null;
 		return this.commands.remove(cmd.toUpperCase());
 	}
@@ -152,12 +152,12 @@ public final class ActorContext {
 	/**
 	 * Clear all commands in current actor.
 	 */
-	public synchronized void clearCommands() {
+	public final synchronized void clearCommands() {
 		this.commands.clear();
 	}
 
 	@Override
-	public String toString() {
+	public final String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("{appID=\"");
 		sb.append(module.app.appID);

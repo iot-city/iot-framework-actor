@@ -72,7 +72,7 @@ public final class AsyncCallbackLocker implements AsyncCallback {
 	/**
 	 * Wait for asynchronous response.
 	 */
-	public void waitForResponse() {
+	public final void waitForResponse() {
 		if (locked || hasCallbackResponse) return;
 
 		synchronized (lock) {
@@ -105,39 +105,39 @@ public final class AsyncCallbackLocker implements AsyncCallback {
 	 * Get the asynchronous response data (null if there is no response).
 	 * @return Response data.
 	 */
-	public ActorResponse getResponse() {
+	public final ActorResponse getResponse() {
 		return response;
 	}
 
 	// --------------------------- Override methods ----------------------------
 
 	@Override
-	public ActorRequest getRequest() {
+	public final ActorRequest getRequest() {
 		return request;
 	}
 
 	@Override
-	public CommandInfo getCommandInfo() {
+	public final CommandInfo getCommandInfo() {
 		return commandInfo;
 	}
 
 	@Override
-	public boolean isTimeout() {
+	public final boolean isTimeout() {
 		return hasTimeout;
 	}
 
 	@Override
-	public boolean hasCallback() {
+	public final boolean hasCallback() {
 		return hasCallbackResponse;
 	}
 
 	@Override
-	public long getTimeout() {
+	public final long getTimeout() {
 		return timeout;
 	}
 
 	@Override
-	public void setTimeout(long timeout) {
+	public final void setTimeout(long timeout) {
 		// Fix timeout value
 		this.timeout = timeout <= 0 ? 60000 : timeout;
 		// Verify status
@@ -154,7 +154,7 @@ public final class AsyncCallbackLocker implements AsyncCallback {
 	}
 
 	@Override
-	public void callback(ActorResponse response) throws IllegalArgumentException {
+	public final void callback(ActorResponse response) throws IllegalArgumentException {
 		// Skip invalid response
 		if (response == null) return;
 

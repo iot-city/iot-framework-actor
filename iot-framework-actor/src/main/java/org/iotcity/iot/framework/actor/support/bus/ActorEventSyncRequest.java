@@ -8,7 +8,7 @@ import org.iotcity.iot.framework.actor.beans.ActorResponse;
  * @author ardon
  * @date 2021-05-12
  */
-public class ActorEventSyncRequest {
+public final class ActorEventSyncRequest {
 
 	/**
 	 * Actor request data object (not null).
@@ -47,21 +47,21 @@ public class ActorEventSyncRequest {
 	/**
 	 * Gets actor request data object (returns not null).
 	 */
-	public ActorRequest getRequest() {
+	public final ActorRequest getRequest() {
 		return request;
 	}
 
 	/**
 	 * Gets response timeout milliseconds for command async mode only.
 	 */
-	public long getTimeout() {
+	public final long getTimeout() {
 		return timeout;
 	}
 
 	/**
 	 * Gets actor response data object.
 	 */
-	public ActorResponse getResponse() {
+	public final ActorResponse getResponse() {
 		return response;
 	}
 
@@ -69,7 +69,7 @@ public class ActorEventSyncRequest {
 	 * Set actor response data object.
 	 * @param response Actor response data object.
 	 */
-	void setResponse(ActorResponse response) {
+	final void setResponse(ActorResponse response) {
 		this.response = response;
 	}
 

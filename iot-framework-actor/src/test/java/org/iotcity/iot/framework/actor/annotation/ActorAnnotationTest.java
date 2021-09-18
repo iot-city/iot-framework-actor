@@ -22,7 +22,7 @@ public class ActorAnnotationTest extends TestCase {
 	 */
 	public void testAnnotations() {
 		IoTFramework.init();
-		ActorManager manager = new ActorManager();
+		ActorManager manager = new ActorManager("Test");
 
 		ActorConfigure configure = new ActorConfigure();
 		PropertiesConfigFile file = new PropertiesConfigFile();

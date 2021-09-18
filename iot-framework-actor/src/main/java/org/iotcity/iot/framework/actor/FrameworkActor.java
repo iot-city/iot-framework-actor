@@ -19,7 +19,7 @@ public final class FrameworkActor {
 	/**
 	 * The global actor manager of framework.
 	 */
-	private static final ActorManager actorManager = new ActorManager();
+	private static final ActorManager actorManager = new ActorManager("Global");
 	/**
 	 * The global actor invoker of framework.
 	 */

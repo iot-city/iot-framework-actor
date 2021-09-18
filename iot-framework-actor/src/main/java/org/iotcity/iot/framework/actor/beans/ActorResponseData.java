@@ -62,7 +62,7 @@ public class ActorResponseData implements ActorResponse {
 	}
 
 	@Override
-	public String toString() {
+	public final String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("{status=");
 		sb.append(status);

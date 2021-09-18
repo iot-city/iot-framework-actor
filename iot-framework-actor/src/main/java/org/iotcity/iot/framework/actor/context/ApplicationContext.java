@@ -84,7 +84,7 @@ public final class ApplicationContext {
 	 * Gets a task handler to execute tasks and timer tasks (returns not null).
 	 * @return Task handler object.
 	 */
-	public TaskHandler getTaskHandler() {
+	public final TaskHandler getTaskHandler() {
 		return taskHandler;
 	}
 
@@ -92,14 +92,14 @@ public final class ApplicationContext {
 	 * Set a new task handler to execute tasks and timer tasks.
 	 * @param taskHandler Task handler object supporting thread pool to execute tasks and timer tasks (required, can not be null).
 	 */
-	public void setTaskHandler(TaskHandler taskHandler) {
+	public final void setTaskHandler(TaskHandler taskHandler) {
 		if (taskHandler != null) this.taskHandler = taskHandler;
 	}
 
 	/**
 	 * Gets the permission validation object of this application context (returns null if the authorizer does not exists).
 	 */
-	public ActorAuthorizer getAuthorizer() {
+	public final ActorAuthorizer getAuthorizer() {
 		return authorizer;
 	}
 
@@ -107,7 +107,7 @@ public final class ApplicationContext {
 	 * Set a permission validation object to this application context (set to null when permission verification is not required).
 	 * @param autorizer The permission validation object.
 	 */
-	public void setAuthorizer(ActorAuthorizer authorizer) {
+	public final void setAuthorizer(ActorAuthorizer authorizer) {
 		this.authorizer = authorizer;
 	}
 
@@ -115,7 +115,7 @@ public final class ApplicationContext {
 	 * Gets modules size.
 	 * @return Modules size.
 	 */
-	public int getModuleSize() {
+	public final int getModuleSize() {
 		return this.modules.size();
 	}
 
@@ -123,7 +123,7 @@ public final class ApplicationContext {
 	 * Gets all modules in this application (returns not null).
 	 * @return All modules in this application.
 	 */
-	public synchronized ModuleContext[] getModules() {
+	public final synchronized ModuleContext[] getModules() {
 		return this.modules.values().toArray(new ModuleContext[this.modules.size()]);
 	}
 
@@ -134,7 +134,7 @@ public final class ApplicationContext {
 	 * @param doc Document description of this module.
 	 * @return The module context that be created in this application (returns null if the moduleID is invalid).
 	 */
-	public synchronized ModuleContext addModule(String moduleID, boolean enabled, String doc) {
+	public final synchronized ModuleContext addModule(String moduleID, boolean enabled, String doc) {
 		if (StringHelper.isEmpty(moduleID)) return null;
 		ModuleContext module = this.modules.get(moduleID.toUpperCase());
 		if (module != null) return module;
@@ -148,7 +148,7 @@ public final class ApplicationContext {
 	 * @param moduleID The module ID in application (not null or empty).
 	 * @return Module context object or null.
 	 */
-	public ModuleContext getModule(String moduleID) {
+	public final ModuleContext getModule(String moduleID) {
 		if (StringHelper.isEmpty(moduleID)) return null;
 		return this.modules.get(moduleID.toUpperCase());
 	}
@@ -158,7 +158,7 @@ public final class ApplicationContext {
 	 * @param moduleID The module ID in application (not null or empty).
 	 * @return If module already exists, it returns true; otherwise, it returns false.
 	 */
-	public boolean hasModule(String moduleID) {
+	public final boolean hasModule(String moduleID) {
 		if (StringHelper.isEmpty(moduleID)) return false;
 		return this.modules.containsKey(moduleID.toUpperCase());
 	}
@@ -168,7 +168,7 @@ public final class ApplicationContext {
 	 * @param moduleID The module ID in application (not null or empty).
 	 * @return The module context object that be removed, will returns null if mismatch.
 	 */
-	public synchronized ModuleContext removeModule(String moduleID) {
+	public final synchronized ModuleContext removeModule(String moduleID) {
 		if (StringHelper.isEmpty(moduleID)) return null;
 		return this.modules.remove(moduleID.toUpperCase());
 	}
@@ -176,12 +176,12 @@ public final class ApplicationContext {
 	/**
 	 * Clear all modules in current application.
 	 */
-	public synchronized void clearModules() {
+	public final synchronized void clearModules() {
 		this.modules.clear();
 	}
 
 	@Override
-	public String toString() {
+	public final String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("{appID=\"");
 		sb.append(appID);

@@ -10,7 +10,7 @@ import org.iotcity.iot.framework.core.beans.ThreadLocalPostman;
  * @author Ardon
  * @date 2021-04-25
  */
-public class ActorThreadPostman implements ThreadLocalPostman {
+public final class ActorThreadPostman implements ThreadLocalPostman {
 
 	/**
 	 * Actor request object from thread local.
@@ -35,14 +35,14 @@ public class ActorThreadPostman implements ThreadLocalPostman {
 	}
 
 	@Override
-	public void storeToCurrentThread() {
+	public final void storeToCurrentThread() {
 		ActorThreadLocal.setRequest(localRequest);
 		ActorThreadLocal.setCommandInfo(commandInfo);
 		ActorThreadLocal.setAsyncCallback(asyncCallback);
 	}
 
 	@Override
-	public void removeAll() {
+	public final void removeAll() {
 		ActorThreadLocal.removeAll();
 	}
 

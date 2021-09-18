@@ -65,7 +65,7 @@ public class ActorRequestData implements ActorRequest {
 	}
 
 	@Override
-	public String[] getLangs() {
+	public final String[] getLangs() {
 		return langs;
 	}
 
@@ -100,7 +100,7 @@ public class ActorRequestData implements ActorRequest {
 	}
 
 	@Override
-	public String toString() {
+	public final String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("{appID=\"");
 		sb.append(appID);

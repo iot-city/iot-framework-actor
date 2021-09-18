@@ -1,10 +1,10 @@
 package org.iotcity.iot.framework.actor.config;
 
 /**
- * Application configure data.
+ * Application configuration data.
  * @author Ardon
  */
-public class ApplicationConfig {
+public final class ApplicationConfig {
 
 	/**
 	 * The application ID.

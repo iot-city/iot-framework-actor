@@ -67,7 +67,7 @@ public final class ModuleContext {
 	 * Gets actors size.
 	 * @return Actors size.
 	 */
-	public int getActorSize() {
+	public final int getActorSize() {
 		return this.actors.size();
 	}
 
@@ -75,7 +75,7 @@ public final class ModuleContext {
 	 * Gets all actors in this module (returns not null).
 	 * @return All actors in this module.
 	 */
-	public synchronized ActorContext[] getActors() {
+	public final synchronized ActorContext[] getActors() {
 		return this.actors.values().toArray(new ActorContext[this.actors.size()]);
 	}
 
@@ -88,7 +88,7 @@ public final class ModuleContext {
 	 * @param doc Document description of this actor.
 	 * @return The actor context that be created in this module (returns null if the actorID is invalid).
 	 */
-	public synchronized ActorContext addActor(PermissionContext permission, String actorID, Class<?> actorClass, boolean enabled, String doc) {
+	public final synchronized ActorContext addActor(PermissionContext permission, String actorID, Class<?> actorClass, boolean enabled, String doc) {
 		if (StringHelper.isEmpty(actorID)) return null;
 		ActorContext actor = this.actors.get(actorID.toUpperCase());
 		if (actor != null && actor.actorClass == actorClass) return actor;
@@ -108,7 +108,7 @@ public final class ModuleContext {
 	 * @param actorID The actor ID in this module.
 	 * @return Actor context object or null.
 	 */
-	public ActorContext getActor(String actorID) {
+	public final ActorContext getActor(String actorID) {
 		if (StringHelper.isEmpty(actorID)) return null;
 		return this.actors.get(actorID.toUpperCase());
 	}
@@ -118,7 +118,7 @@ public final class ModuleContext {
 	 * @param actorID The actor ID in this module.
 	 * @return Returns true if actor ID already exists; otherwise, returns false.
 	 */
-	public boolean hasActor(String actorID) {
+	public final boolean hasActor(String actorID) {
 		if (StringHelper.isEmpty(actorID)) return false;
 		return this.actors.containsKey(actorID.toUpperCase());
 	}
@@ -128,7 +128,7 @@ public final class ModuleContext {
 	 * @param actorID The actor ID in this module.
 	 * @return The actor context object that be removed, will returns null if mismatch.
 	 */
-	public synchronized ActorContext removeActor(String actorID) {
+	public final synchronized ActorContext removeActor(String actorID) {
 		if (StringHelper.isEmpty(actorID)) return null;
 		return this.actors.remove(actorID.toUpperCase());
 	}
@@ -136,12 +136,12 @@ public final class ModuleContext {
 	/**
 	 * Clear all actors in current module.
 	 */
-	public synchronized void clearActors() {
+	public final synchronized void clearActors() {
 		this.actors.clear();
 	}
 
 	@Override
-	public String toString() {
+	public final String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("{appID=\"");
 		sb.append(app.appID);

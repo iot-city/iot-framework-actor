@@ -14,10 +14,14 @@ import org.iotcity.iot.framework.core.util.helper.StringHelper;
  * Actor manager to manage applications.
  * @author Ardon
  */
-public class ActorManager implements Configurable<ApplicationContext[]> {
+public final class ActorManager implements Configurable<ApplicationContext[]> {
 
 	// --------------------------- Private fields ----------------------------
 
+	/**
+	 * The manager ID.
+	 */
+	private final String managerID;
 	/**
 	 * All applications, the key is application appID|version(upper case), the value is application context object.
 	 */
@@ -31,7 +35,7 @@ public class ActorManager implements Configurable<ApplicationContext[]> {
 	 * @param version The application version.
 	 * @return The application key fixed.
 	 */
-	protected static String getAppKey(String appID, String version) {
+	protected final static String getAppKey(String appID, String version) {
 		String ver = fixAppVersion(version);
 		return appID.toUpperCase() + "|" + ver.toUpperCase();
 	}
@@ -41,14 +45,33 @@ public class ActorManager implements Configurable<ApplicationContext[]> {
 	 * @param version The application version (optional, when it is null, the default value is "1.0.0").
 	 * @return The version string fixed.
 	 */
-	public static String fixAppVersion(String version) {
+	public final static String fixAppVersion(String version) {
 		return (version == null || version.trim().length() == 0) ? "1.0.0" : version.trim();
+	}
+
+	// --------------------------- Constructor ----------------------------
+
+	/**
+	 * Constructor for actor manager.
+	 * @param managerID The manager ID (required, can not be null or empty).
+	 * @throws IllegalArgumentException An error will be thrown when the parameter "managerID" is null or empty.
+	 */
+	public ActorManager(String managerID) throws IllegalArgumentException {
+		if (StringHelper.isEmpty(managerID)) throw new IllegalArgumentException("Parameter managerID can not be null or empty!");
+		this.managerID = managerID;
 	}
 
 	// --------------------------- Public methods ----------------------------
 
+	/**
+	 * Gets the manager ID (never null).
+	 */
+	public final String getManagerID() {
+		return managerID;
+	}
+
 	@Override
-	public synchronized boolean config(ApplicationContext[] data, boolean reset) {
+	public final synchronized boolean config(ApplicationContext[] data, boolean reset) {
 		if (data == null) return false;
 		if (reset) {
 			this.apps.clear();
@@ -69,7 +92,7 @@ public class ActorManager implements Configurable<ApplicationContext[]> {
 	 * Gets applications size (includes applications and different versions).
 	 * @return Applications size.
 	 */
-	public int getApplicationSize() {
+	public final int getApplicationSize() {
 		return this.apps.size();
 	}
 
@@ -77,7 +100,7 @@ public class ActorManager implements Configurable<ApplicationContext[]> {
 	 * Gets all applications in this actor manager (returns not null).
 	 * @return All applications in manager.
 	 */
-	public synchronized ApplicationContext[] getApplications() {
+	public final synchronized ApplicationContext[] getApplications() {
 		return this.apps.values().toArray(new ApplicationContext[this.apps.size()]);
 	}
 
@@ -85,7 +108,7 @@ public class ActorManager implements Configurable<ApplicationContext[]> {
 	 * Add an application to this actor manager, if the application ID has been added, it will be replaced by current application object.
 	 * @param app Application context object (not null).
 	 */
-	public synchronized void addApplication(ApplicationContext app) {
+	public final synchronized void addApplication(ApplicationContext app) {
 		if (app == null) return;
 		this.apps.put(getAppKey(app.appID, app.version), app);
 	}
@@ -96,7 +119,7 @@ public class ActorManager implements Configurable<ApplicationContext[]> {
 	 * @param version The application version (optional, when it is null, the default value is "1.0.0").
 	 * @return Application context object or null.
 	 */
-	public ApplicationContext getApplication(String appID, String version) {
+	public final ApplicationContext getApplication(String appID, String version) {
 		if (StringHelper.isEmpty(appID)) return null;
 		return this.apps.get(getAppKey(appID, version));
 	}
@@ -107,7 +130,7 @@ public class ActorManager implements Configurable<ApplicationContext[]> {
 	 * @param version The application version (optional, when it is null, the default value is "1.0.0").
 	 * @return If mid already exists, it returns true; otherwise, it returns false.
 	 */
-	public boolean hasApplication(String appID, String version) {
+	public final boolean hasApplication(String appID, String version) {
 		if (StringHelper.isEmpty(appID)) return false;
 		return this.apps.containsKey(getAppKey(appID, version));
 	}
@@ -118,7 +141,7 @@ public class ActorManager implements Configurable<ApplicationContext[]> {
 	 * @param version The application version (optional, when it is null, the default value is "1.0.0").
 	 * @return The application context object that be removed, will returns null if mismatch.
 	 */
-	public synchronized ApplicationContext removeApplication(String appID, String version) {
+	public final synchronized ApplicationContext removeApplication(String appID, String version) {
 		if (StringHelper.isEmpty(appID)) return null;
 		return this.apps.remove(getAppKey(appID, version));
 	}
@@ -126,7 +149,7 @@ public class ActorManager implements Configurable<ApplicationContext[]> {
 	/**
 	 * Clear all applications in current manager.
 	 */
-	public synchronized void clearApplications() {
+	public final synchronized void clearApplications() {
 		this.apps.clear();
 	}
 
@@ -140,7 +163,7 @@ public class ActorManager implements Configurable<ApplicationContext[]> {
 	 * @param enabledOnly If it is set to true, returns enabled command only; otherwise, the disabled command can be returned.
 	 * @return Command context object or null.
 	 */
-	public CommandContext getCommand(String appID, String appVersion, String moduleID, String actorID, String cmd, boolean enabledOnly) {
+	public final CommandContext getCommand(String appID, String appVersion, String moduleID, String actorID, String cmd, boolean enabledOnly) {
 		// Gets an application object
 		ApplicationContext app = this.getApplication(appID, appVersion);
 		if (app == null || (enabledOnly && !app.enabled)) return null;

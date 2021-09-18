@@ -3,6 +3,7 @@ package org.iotcity.iot.framework.actor;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.iotcity.iot.framework.IoTFramework;
 import org.iotcity.iot.framework.actor.beans.ActorAuthorizer;
@@ -19,6 +20,7 @@ import org.iotcity.iot.framework.actor.beans.AsyncCallbackTimer;
 import org.iotcity.iot.framework.actor.beans.CommandInfo;
 import org.iotcity.iot.framework.actor.beans.CommandInfoData;
 import org.iotcity.iot.framework.actor.context.CommandContext;
+import org.iotcity.iot.framework.core.hook.HookListener;
 import org.iotcity.iot.framework.core.i18n.LocaleText;
 import org.iotcity.iot.framework.core.logging.Logger;
 import org.iotcity.iot.framework.core.util.helper.JavaHelper;
@@ -28,7 +30,18 @@ import org.iotcity.iot.framework.core.util.helper.StringHelper;
  * Execute the actor methods by this invoker.
  * @author Ardon
  */
-public class ActorInvoker {
+public final class ActorInvoker {
+
+	// ---------------------------------- Private fields ----------------------------------
+
+	/**
+	 * The request processing running count.
+	 */
+	private final AtomicLong runningCount = new AtomicLong();
+	/**
+	 * The time in milliseconds to wait for the actor to complete data requests before the system shuts down (10000ms by default).
+	 */
+	private long waitForShuttingDwon = 10000;
 
 	// ---------------------------------- Protected fields ----------------------------------
 
@@ -74,6 +87,32 @@ public class ActorInvoker {
 		if (manager == null) throw new IllegalArgumentException("Parameter manager can not be null!");
 		this.manager = manager;
 		this.setOptions(options);
+		// Add system hook.
+		IoTFramework.getHookmanager().addHook(new HookListener() {
+
+			@Override
+			public void onShuttingDown() {
+				// Logs a message.
+				logger.info(locale.text("actor.invoke.shuttingdown", manager.getManagerID(), runningCount.get(), waitForShuttingDwon));
+				// Waiting times.
+				int times = 0;
+				// The max waiting times.
+				int maxTimes = (int) (waitForShuttingDwon / 100);
+				// Check the running count.
+				while (runningCount.get() > 0) {
+					// Check for times.
+					if (++times > maxTimes) break;
+					// Sleep for finishing.
+					try {
+						Thread.sleep(100);
+					} catch (Exception e) {
+					}
+				}
+				// Logs a message.
+				logger.info(locale.text("actor.invoke.shutteddown", manager.getManagerID(), runningCount.get()));
+			}
+
+		}, 100);
 	}
 
 	// ---------------------------------- Public options method ----------------------------------
@@ -89,7 +128,7 @@ public class ActorInvoker {
 	/**
 	 * Gets a default permission validation object of this invoker (returns null if the authorizer does not exists).
 	 */
-	public ActorAuthorizer getAuthorizer() {
+	public final ActorAuthorizer getAuthorizer() {
 		return authorizer;
 	}
 
@@ -98,7 +137,7 @@ public class ActorInvoker {
 	 * The permission validation object in application context will be used preferentially.
 	 * @param autorizer The permission validation object.
 	 */
-	public void setAuthorizer(ActorAuthorizer authorizer) {
+	public final void setAuthorizer(ActorAuthorizer authorizer) {
 		this.authorizer = authorizer;
 	}
 
@@ -106,7 +145,7 @@ public class ActorInvoker {
 	 * Set invoker options.
 	 * @param options The invoker options, you can set actor factory, authorizer, logger or locale in this options (optional, it can be set to null when using the default configure).
 	 */
-	public void setOptions(ActorInvokerOptions options) {
+	public final void setOptions(ActorInvokerOptions options) {
 		if (options != null) {
 			this.factory = options.factory;
 			this.logger = options.logger == null ? FrameworkActor.getLogger() : options.logger;
@@ -118,6 +157,21 @@ public class ActorInvoker {
 		}
 	}
 
+	/**
+	 * Gets the time in milliseconds to wait for the actor to complete data requests before the system shuts down (10000ms by default).
+	 */
+	public final long getWaitForShuttingDwon() {
+		return waitForShuttingDwon;
+	}
+
+	/**
+	 * Set the time in milliseconds to wait for the actor to complete data requests before the system shuts down (10000ms by default).
+	 * @param waitForShuttingDwon
+	 */
+	public final void setWaitForShuttingDwon(long time) {
+		this.waitForShuttingDwon = time;
+	}
+
 	// ---------------------------------- Public synchronous invoke method ----------------------------------
 
 	/**
@@ -127,7 +181,7 @@ public class ActorInvoker {
 	 * @return Actor response data object.
 	 * @throws IllegalArgumentException An error will be thrown when the parameter "request" is null.
 	 */
-	public ActorResponse syncInvoke(ActorRequest request, long timeout) throws IllegalArgumentException {
+	public final ActorResponse syncInvoke(ActorRequest request, long timeout) throws IllegalArgumentException {
 		// Parameter verification
 		if (request == null) throw new IllegalArgumentException("Parameter request can not be null!");
 
@@ -140,6 +194,8 @@ public class ActorInvoker {
 		CommandInfo info = new CommandInfoData(manager, command.actor.module.app, command.actor.module, command.actor, command);
 
 		try {
+			// Increment the running count.
+			runningCount.incrementAndGet();
 			// Set command information to thread local
 			ActorThreadLocal.setCommandInfo(info);
 			// Set request to thread local
@@ -268,6 +324,8 @@ public class ActorInvoker {
 			}
 
 		} finally {
+			// Decrement the running count.
+			runningCount.decrementAndGet();
 			// Remove all actor thread local variables.
 			ActorThreadLocal.removeAll();
 		}
@@ -283,7 +341,7 @@ public class ActorInvoker {
 	 * @param timeout Response timeout milliseconds for command async mode only (optional, if set timeout to 0, it will use the command.timeout defined or 60000ms by default).
 	 * @throws IllegalArgumentException An error will be thrown when the parameter "request" or "callback" is null.
 	 */
-	public void asyncInvoke(ActorRequest request, ActorResponseCallback callback, long timeout) throws IllegalArgumentException {
+	public final void asyncInvoke(ActorRequest request, ActorResponseCallback callback, long timeout) throws IllegalArgumentException {
 		// Parameter verification
 		if (request == null || callback == null) throw new IllegalArgumentException("Parameter request and callback can not be null!");
 
@@ -299,6 +357,8 @@ public class ActorInvoker {
 		CommandInfo info = new CommandInfoData(manager, command.actor.module.app, command.actor.module, command.actor, command);
 
 		try {
+			// Increment the running count.
+			runningCount.incrementAndGet();
 			// Set command information to thread local
 			ActorThreadLocal.setCommandInfo(info);
 			// Set request to thread local
@@ -436,6 +496,8 @@ public class ActorInvoker {
 			}
 
 		} finally {
+			// Decrement the running count.
+			runningCount.decrementAndGet();
 			// Remove all actor thread local variables.
 			ActorThreadLocal.removeAll();
 		}

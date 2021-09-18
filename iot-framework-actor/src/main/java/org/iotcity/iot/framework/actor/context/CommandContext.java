@@ -83,7 +83,7 @@ public final class CommandContext {
 	}
 
 	@Override
-	public String toString() {
+	public final String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("{appID=\"");
 		sb.append(actor.module.app.appID);

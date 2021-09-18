@@ -9,7 +9,7 @@ import org.iotcity.iot.framework.core.logging.Logger;
  * @author Ardon
  * @date 2021-04-24
  */
-public class ActorInvokerOptions {
+public final class ActorInvokerOptions {
 
 	/**
 	 * Actor factory for actor instance creation (optional, it can be set to null value when using {@link IoTFramework }.getGlobalInstanceFactory() to create an instance).

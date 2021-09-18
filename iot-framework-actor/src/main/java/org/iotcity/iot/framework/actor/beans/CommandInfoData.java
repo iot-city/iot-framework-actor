@@ -50,27 +50,27 @@ public final class CommandInfoData implements CommandInfo {
 	}
 
 	@Override
-	public ActorManager getManager() {
+	public final ActorManager getManager() {
 		return manager;
 	}
 
 	@Override
-	public ApplicationContext getApplication() {
+	public final ApplicationContext getApplication() {
 		return app;
 	}
 
 	@Override
-	public ModuleContext getModule() {
+	public final ModuleContext getModule() {
 		return module;
 	}
 
 	@Override
-	public ActorContext getActor() {
+	public final ActorContext getActor() {
 		return actor;
 	}
 
 	@Override
-	public CommandContext getCommand() {
+	public final CommandContext getCommand() {
 		return command;
 	}
 
