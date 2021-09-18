@@ -113,7 +113,11 @@ public final class ActorInvoker {
 					}
 				}
 				// Logs a message.
-				logger.info(locale.text("actor.invoke.shutteddown", manager.getManagerID(), runningCount.get()));
+				if (runningCount.get() > 0) {
+					logger.info(locale.text("actor.invoke.shutteddown.fails", manager.getManagerID(), runningCount.get()));
+				} else {
+					logger.info(locale.text("actor.invoke.shutteddown", manager.getManagerID()));
+				}
 			}
 
 		}, 100);
