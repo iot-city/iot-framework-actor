@@ -41,7 +41,7 @@ public final class ActorInvoker {
 	/**
 	 * The time in milliseconds to wait for the actor to complete data requests before the system shuts down (10000ms by default).
 	 */
-	private long waitForShuttingDwon = 10000;
+	private long waitForShuttingDown = 10000;
 	/**
 	 * The invoker options that has been set.
 	 */
@@ -97,11 +97,11 @@ public final class ActorInvoker {
 			@Override
 			public void onShuttingDown() {
 				// Logs a message.
-				logger.info(locale.text("actor.invoke.shuttingdown", manager.getManagerID(), runningCount.get(), waitForShuttingDwon));
+				logger.info(locale.text("actor.invoke.shuttingdown", manager.getManagerID(), runningCount.get(), waitForShuttingDown));
 				// Waiting times.
 				int times = 0;
 				// The max waiting times.
-				int maxTimes = (int) (waitForShuttingDwon / 100);
+				int maxTimes = (int) (waitForShuttingDown / 100);
 				// Check the running count.
 				while (runningCount.get() > 0) {
 					// Check for times.
@@ -176,16 +176,16 @@ public final class ActorInvoker {
 	/**
 	 * Gets the time in milliseconds to wait for the actor to complete data requests before the system shuts down (10000ms by default).
 	 */
-	public final long getWaitForShuttingDwon() {
-		return waitForShuttingDwon;
+	public final long getWaitForShuttingDown() {
+		return waitForShuttingDown;
 	}
 
 	/**
 	 * Set the time in milliseconds to wait for the actor to complete data requests before the system shuts down (10000ms by default).
-	 * @param waitForShuttingDwon
+	 * @param The time in milliseconds to wait for the actor to complete.
 	 */
-	public final void setWaitForShuttingDwon(long time) {
-		this.waitForShuttingDwon = time;
+	public final void setWaitForShuttingDown(long time) {
+		this.waitForShuttingDown = time;
 	}
 
 	// ---------------------------------- Public synchronous invoke method ----------------------------------
