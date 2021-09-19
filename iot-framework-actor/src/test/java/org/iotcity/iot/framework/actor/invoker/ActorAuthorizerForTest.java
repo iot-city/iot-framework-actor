@@ -55,7 +55,7 @@ public class ActorAuthorizerForTest implements ActorAuthorizer {
 		default:
 			break;
 		}
-		return false;
+		return true;
 	}
 
 }

@@ -2,6 +2,7 @@ package org.iotcity.iot.framework.actor.support.bus;
 
 import org.iotcity.iot.framework.actor.beans.ActorRequest;
 import org.iotcity.iot.framework.actor.beans.ActorResponseCallback;
+import org.iotcity.iot.framework.core.util.helper.JavaHelper;
 
 /**
  * Actor asynchronous event request data for framework bus event publishing.
@@ -66,6 +67,17 @@ public final class ActorEventAsyncRequest {
 	 */
 	public final long getTimeout() {
 		return timeout;
+	}
+
+	@Override
+	public final String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("{request=");
+		JavaHelper.getDataPreview(request, sb);
+		sb.append(", timeout=");
+		sb.append(timeout);
+		sb.append("}");
+		return sb.toString();
 	}
 
 }
